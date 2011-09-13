@@ -66,6 +66,8 @@ define('HDOM_INFO_TEXT', 4);
 define('HDOM_INFO_INNER', 5);
 define('HDOM_INFO_OUTER', 6);
 define('HDOM_INFO_ENDSPACE', 7);
+define('DEFAULT_TARGET_CHARSET', NULL);
+define('DEFAULT_BR_TEXT', NULL); 
 
 /**
  * Main parse function.
