@@ -113,7 +113,6 @@ function ppp_db_save_category($category) {
  *    - array fields [string $name => object $field { string $value }],
  *    - int updated,
  *    - int joined,
- *    - int login,
  *    - int posts,
  *   Optional values include:
  *    - string notes,
