@@ -72,7 +72,7 @@ define('DEFAULT_BR_TEXT', NULL);
 /**
  * Main parse function.
  */
-function spiderweb_html_parse($str, $lowercase = TRUE, $forceTagsClosed = TRUE, $target_charset = DEFAULT_TARGET_CHARSET, $stripRN = TRUE, $defaultBRText = DEFAULT_BR_TEXT) {
+function spiderweb_html_parse($str, $lowercase = TRUE, $forceTagsClosed = TRUE, $target_charset = DEFAULT_TARGET_CHARSET, $stripRN = FALSE, $defaultBRText = DEFAULT_BR_TEXT) {
   $dom = new spiderweb_html_parser(NULL, $lowercase, $forceTagsClosed, $target_charset, $defaultBRText);
   if (empty($str)) {
     $dom->clear();
