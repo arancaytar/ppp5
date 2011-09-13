@@ -1,0 +1,10 @@
+; $Id: ppp_db.info 507 2011-09-13 14:23:38Z arancaytar $
+
+name = Database Layer
+description = Schema and interface for the PPP5 database.
+core = 8.x
+package = Pied Piper Project
+
+files[] = ppp_db.module
+files[] = ppp_db.load.inc
+files[] = ppp_db.save.inc

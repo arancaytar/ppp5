@@ -1,0 +1,12 @@
+; $Id: ppp_display.info 507 2011-09-13 14:23:38Z arancaytar $
+
+name = Web Display
+description = Display the PPP archives on the web.
+package = Pied Piper Project
+
+core = 8.x
+
+files[] = ppp_display.module
+files[] = ppp_display.pages.inc
+
+dependencies[] = ppp_db

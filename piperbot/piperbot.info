@@ -1,0 +1,11 @@
+; $Id: piperbot.info 507 2011-09-13 14:23:38Z arancaytar $
+
+name = Piperbot
+description = Hello. I'm Piperbot. I am an artificial intelligence that controls what, how and when content is archived.
+core = 8.x
+package = Pied Piper Project
+
+dependencies[] = ppp_db
+dependencies[] = spiderweb
+
+files[] = piperbot.module

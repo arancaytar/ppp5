@@ -1,0 +1,139 @@
+<?php
+// $Id: spiderweb.module 478 2010-08-16 11:58:31Z arancaytar $
+
+/**
+ * @file spiderweb.module
+ */
+ 
+/**
+ * Grab one topic from Spiderweb. Raw output will be returned.
+ *
+ * @param $pid
+ *   The Post ID of the first post in the topic.
+ *
+ * @return
+ *   string of HTML markup.
+ */
+function spiderweb_grab_topic($pid, $page = 'all') {
+  $form = array(
+    'ubb' => 'showflat',
+    'Number' => $pid,
+    'page' => $page,
+  );
+  $response = module_invoke('spiderweb', 'get', $form);
+  return $response->data;
+}
+
+/**
+ * Index a complete forum.
+ * @TODO: Move this to the piperbot, because grabbing and parsing should be distinct.
+ *
+ * @param $fid
+ *   The forum ID that should be indexed.
+ * @param $max_pages
+ *   [optional] How many pages should be grabbed at most. If not set, all pages will be grabbed.
+ *   Number of topics per page is determined by the user account this module logs in as.
+ *   The maximum number is 99.
+ *
+ * @return
+ *   An array of topic objects.
+ */
+function spiderweb_index_forum($fid, $max_pages = 0) {
+  $total_pages = 1; // update this value later.
+  $topics = array();
+  for ($i = 1; $i <= $total_pages; $i++) {
+    $data = spiderweb_grab_forum_page($fid, $i);
+    $forum = module_invoke('spiderweb', 'parse_forum', $data);
+    $total_pages = $max_pages ? min($max_pages, $forum->pages) : $forum->pages;
+    $topics += $forum->topics;
+  }
+  
+  foreach ($topics as &$topic) $topic->forum = $fid;
+  return $topics;
+}
+
+/**
+ * Grab a single page of a forum.
+ *
+ * @param $forum
+ *   The ID number of the forum to acquire.
+ * @param $page
+ *   The page number
+ *
+ * @return
+ *   The page as a string of HTML markup.
+ */
+function spiderweb_grab_forum_page($forum, $page) {
+  $form = array(
+    'ubb' => 'postlist',
+    'Board' => $forum,
+    'page' => $page,
+  );
+  
+  $response = module_invoke('spiderweb', 'get', $form);
+  return $response->data;
+}
+
+/**
+ * Grab the front page of the whole board.
+ *
+ * @return
+ *   string of HTML markup.
+ */
+function spiderweb_grab_main_page() {
+  $form = array('ubb' => 'cfrm');
+  $response = module_invoke('spiderweb', 'get', $form);
+  return $response->data;
+}
+
+/**
+ * Grab a user page.
+ *
+ * @param $uid
+ *   int the user ID to be requested.
+ *
+ * @return
+ *   string a page of HTML markup
+ */
+function spiderweb_grab_user($uid) {
+  $form = array(
+    'ubb' => 'showprofile',
+    'User' => $uid,
+  );
+  $response = module_invoke('spiderweb', 'get', $form);
+  return $response->data;
+}
+
+/**
+ * Grab a user page in the admin view. This shows all fields.
+ * REQUIRES ADMIN PRIVILEGE.
+ *
+ * @param $uid
+ *   int the user ID to be requested.
+ *
+ * @return
+ *   string a page of HTML markup
+ */
+function spiderweb_grab_user_edit($uid) {
+  $form = array(
+    'uid' => $uid,
+  );
+  $response = module_invoke('spiderweb', 'get', $form, 'admin/showuser.php');
+  return $response->data;
+}
+
+/* OBSOLETE.
+/**
+ * Note: Because of a moronic design, the data returned by this function cannot
+ * contain a reference to the forum the thread is in. This will have to be done by separate indexing.
+ *
+function spiderweb_grab_topic_print($tid) {
+  $fields = array(
+    'ubb' => 'printthread',
+    'main' => $tid,
+    'type' => 'thread',
+  );
+  $response = spiderweb_get($fields);
+  return $response->data;
+}*/
+

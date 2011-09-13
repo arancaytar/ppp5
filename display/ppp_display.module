@@ -1,0 +1,95 @@
+<?php
+// $Id: ppp_display.module 482 2010-08-16 22:47:26Z arancaytar $
+
+/**
+ * @file ppp_display.module
+ * General hooks as well as helper functions for displaying PPP.
+ */
+
+/**
+ * DB-less pager. We need this for PDO.
+ */
+function ppp_pager_args($limit = 10, $element = 0, $total = 10) {
+  global $pager_page_array, $pager_total, $pager_total_items;
+  $page = isset($_GET['page']) ? $_GET['page'] : '';
+  
+  $pager_total_items[$element] = $total;
+  
+  $pager_total[$element] = ceil($pager_total_items[$element] / $limit);
+  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) - 1));
+  
+  return array('start' => $pager_page_array[$element] * $limit, 'count' => $limit);
+}
+
+/**
+ * Implementation of hook_menu()
+ */
+function ppp_display_menu() {
+  $menu['archives'] = array(
+    'title' => 'Archives',
+    'description' => 'View all forums',
+    'page callback' => 'ppp_display_main',
+    'page arguments' => array(1),
+    'access arguments' => array('view archived content'),
+    'file' => 'ppp_display.pages.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  
+  $menu['forum/%'] = array(
+    'title' => '[Forum]', // Generic title, replaced by display function
+    'description' => 'Display the postlist of one forum',
+    'page callback' => 'ppp_display_forum',
+    'page arguments' => array(1),
+    'access callback' => 'ppp_display_access_forum',
+    'access arguments' => array(1),
+    'file' => 'ppp_display.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  
+  $menu['topic/%'] = array(
+    'title' => '[Topic]', // Generic title, replaced by display function
+    'description' => 'Display the postlist of one forum',
+    'page callback' => 'ppp_display_forum',
+    'page arguments' => array(1),
+    'access callback' => 'ppp_display_access_forum',
+    'access arguments' => array(1),
+    'file' => 'ppp_display.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  
+  return $menu;
+}
+
+/**
+ * Implementation of hook_perm()
+ */
+function ppp_display_perm() {
+  $perm['view archived content'] = t('View any public forum, topic or post in the archives.');
+  
+  /*
+   * This permission must not be given to anyone who is not a moderator on Spiderweb
+   * or Stareye will do something very nasty to me.
+   */
+  $perm['view classified content'] = t('View content that is not public on the original forum.');
+  
+  return $perm;
+}
+
+/**
+ * Implementation of hook_theme()
+ */
+function ppp_display_theme() {
+  $theme['ppp_display_forumlist'] = array(
+    'arguments' => array('fora' => NULL, 'caption' => NULL),
+  );
+  $theme['ppp_display_topiclist'] = array(
+    'arguments' => array('topics' => NULL, 'forum' => NULL),
+  );
+  $theme['ppp_display_postlist'] = array(
+    'arguments' => array('posts' => NULL, 'topic' => NULL, 'forum' => NULL),
+  );
+  $theme['ppp_display_lastpost'] = array(
+    'arguments' => array('lastpost' => NULL),
+  );
+  return $theme;
+}

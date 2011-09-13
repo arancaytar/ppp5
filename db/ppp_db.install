@@ -1,0 +1,380 @@
+<?php
+// $Id: ppp_db.install 506 2011-09-13 12:21:30Z arancaytar $
+
+/**
+ * @file ppp_db.install
+ * Installation functions for PPP.
+ */
+
+
+/**
+ * Implementation of hook_schema(). 
+ */
+function ppp_db_schema() {
+  $schema['topic'] = array(
+    'description' => 'Each record is one archived topic. Topics are not stored until fully saved.',
+    'fields' => array(
+      // Key
+      'tid' => array(
+        'description' => 'Key. On Spiderweb, defines the print view.',
+        'type' => 'int',
+      ),
+      
+      // Foreign keys
+      'post' => array(
+        'description' => 'Foreign key of the first post. Denormalized upward from post, required for SW.',
+        'type' => 'int',
+      ),
+      'forum' => array(
+        'description' => 'Foreign key of the forum this topic is in.',
+        'type' => 'int',
+      ),
+      'author' => array(
+        'description' => 'The user this topic was started by. Also denormalized upward from post.',
+        'type' => 'int',
+      ),
+      
+      // Data
+      'started' => array(
+        'description' => 'Unix timestamp of first post (denormalized upward).',
+        'type' => 'int',
+      ),
+      'ended' => array(
+        'description' => 'Unix timestamp of last post so far (denormalized upward). NOT used for expiring cached data.',
+        'type' => 'int',
+      ),
+      
+      'title' => array(
+        'description' => 'Title of the topic',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+      'closed' => array(
+        'description' => 'Whether this topic is closed (1 for true).',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'sticky' => array(
+        'description' => 'Whether this topic is sticky (1 for true).',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      
+      'icon' => array(
+        'description' => 'The number of the icon this topic uses (denormalized upward)',
+        'type' => 'int',
+      ),
+      
+      'length' => array(
+        'description' => 'How many posts this topic has (denormalized upward)',
+        'type' => 'int',
+        'default' => 1
+      ),
+    ),
+    
+    'primary key' => array('tid'),
+    'unique' => array(
+      'post' => array('post'),
+    ),
+    'indexes' => array(
+      'ended' => array('ended'), // Don't need a start -> sort by ID.
+      'length' => array('length'),
+      'title' => array('title'),
+      'forum' => array('forum', 'tid'),
+      'author' => array('author', 'tid'),
+      
+      'forum_ended' => array('forum', 'ended'),
+      'forum_author' => array('forum', 'author'),
+      'forum_length' => array('forum', 'length'),
+      'forum_title' => array('forum', 'title'),
+      
+      'author_ended' => array('author', 'ended'),
+      'author_length' => array('author', 'length'),
+      'author_title' => array('author', 'title'),
+    ),
+  );
+  
+  $schema['post'] = array(
+    'description' => 'The real treasure of PPP',
+    'fields' => array(
+      'pid' => array(
+        'description' => 'Unique post id key',
+        'type' => 'int',
+      ),
+      
+      'topic' => array(
+        'description' => 'Topic this post is in.',
+        'type' => 'int',
+      ),
+      
+      'forum' => array(
+        'description' => 'Forum this post is in (denormalized downward from the topic table).',
+        'type' => 'int',
+      ),
+      
+      'author' => array(
+        'description' => 'User id who wrote this post',
+        'type' => 'int',
+      ),
+      
+      'created' => array(
+        'description' => 'Unix timestamp when this post was written',
+        'type' => 'int',
+      ),
+      
+      'icon' => array(
+        'description' => 'Icon of the post',
+        'type' => 'int',
+      ),
+      
+      'body' => array(
+        'description' => 'Content of the post',
+        'type' => 'text',
+      ),
+      
+      'ip' => array(
+        'description' => 'IP used to submit this post',
+        'type' => 'varchar',
+        'length' => '15',
+      ),
+    ),
+    
+    'primary key' => array('pid'),
+    'indexes' => array(
+      'author' => array('author', 'created'),
+      'created' => array('created'),
+      'forum' => array('forum'),
+      'topic' => array('topic', 'pid'),
+      'forum_topic' => array('forum', 'topic'),
+    ),
+  );
+  
+  $schema['forum'] = array(
+    'description' => 'Archived forums',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'Primary key of the forum type',
+        'type' => 'int',
+      ),
+      
+      'category' => array(
+        'description' => 'Foreign key for the category table.',
+        'type' => 'int',
+      ),
+      
+      'name' => array(
+        'description' => 'Forum name',
+        'type' => 'varchar',
+        'length' => 64,
+      ),
+      
+      'description' => array(
+        'description' => 'description (how often can I say description in one schema description?)',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+    ),
+    
+    'primary key' => array('fid'),
+  );
+  
+  $schema['category'] = array(
+    'description' => 'Categories are forum containers. On Spiderweb, there have always been two.',
+    'fields' => array(
+      'cid' => array(
+        'description' => 'Primary key for the category type',
+        'type' => 'int',
+      ),
+      
+      'name' => array(
+        'description' => 'Name of the category',
+        'type' => 'varchar',
+        'length' => 64,
+      ),
+      // That's it folks.
+    ),
+    
+    'primary key' => array('cid'),
+    // I doubt we need indexes here. (See description).
+  );
+  
+  // This is where the new Endeavor begins.
+  
+  $schema['user'] = array(
+    'description' => 'Main endeavor table.',
+    'fields' => array(
+      'uid' => array(
+        'description' => 'Primary user ID on Spiderweb.',
+        'type' => 'int',
+      ),
+      
+      'joined' => array(
+        'description' => 'Unix timestamp of the creation of this account.',
+        'type' => 'int',
+      ),
+      
+      'posts' => array(
+        'description' => 'Post count of this user.',
+        'type' => 'int',
+      ),
+      
+      'notes' => array(
+        'description' => 'Personal notes on this user',
+        'type' => 'text',
+      ),
+      
+      'updated' => array(
+        'description' => 'When was this profile last downloaded? unix timestamp',
+        'type' => 'int',
+      ),
+    ),
+    
+    'primary key' => array('uid'),
+    'unique' => array('login'),
+  );
+  
+  $schema['user_field'] = array(
+    'description' => 'Field types',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'Field ID',
+        'type' => 'serial',
+      ),                            
+      'name' => array(
+        'description' => 'Field name',
+        'type' => 'varchar',
+        'length' => 24,
+      ),
+      'label' => array(
+        'description' => 'Human readable label',
+        'type' => 'varchar',
+        'length' => 32,
+      ),
+    ),
+    'primary key' => array('fid'),
+    'unique' => array('name'),
+  );
+  
+  $schema['user_profile'] = array(
+    'description' => 'Archived fields of profiles',
+    'fields' => array(          
+      'aid' => array(
+        'description' => 'Artificial auto-incrementing field ID',
+        'type' => 'int',
+      ),
+      'uid' => array(
+        'description' => 'User ID',
+        'type' => 'int',
+      ),
+      'field' => array(
+        'description' => 'Field ID (see user_fields)',
+        'type' => 'int',
+      ),
+      'value' => array(
+        'description' => 'Value of this field',
+        'type' => 'varchar',
+        'length' => 255, // Forgive me, Codd.
+      ),
+      
+      'created' => array(
+        'description' => 'Timestamp of the first discovery of this value.',
+        'type' => 'int',
+      ),
+      
+      'expired' => array(
+        'description' => 'Timestamp of the moment this field was replaced, or NULL if the field is current.',
+        'type' => 'int',
+      ),
+    ),
+  );
+  
+  $schema['crawl'] = array(
+    'description' => 'Keeps track of when a topic was last crawled, or which topics were NEVER crawled.',
+    'fields' => array(
+      'post' => array(
+        'description' => 'Primary key for this table. SW uses pid on forum index, so non-saved topics have this.',
+        'type' => 'int',
+      ),
+      'archived' => array(
+        'description' => 'Timestamp when this topic was last archived, or NULL.',
+        'type' => 'int',
+      ),
+      'updated' => array(
+        'description' => 'Not to be confused with {topic}.lastpost. archived<updated is checked by piperbot.',
+        'type' => 'int',
+      ),
+      'forum' => array(
+        'description' => 'Forum this topic is in. Preliminary info to help piperbot decide.',
+        'type' => 'int',
+      ),
+      'author' => array(
+        'description' => 'User who started this topic. Preliminary info to help piperbot decide.',
+        'type' => 'int',
+      ),
+      'length' => array(
+        'description' => 'Number of posts in this topic. Preliminary info to help piperbot decide.',
+        'type' => 'int',
+      ),
+      'title' => array(
+        'description' => 'Title of this topic. Preliminary info to help piperbot decide.',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+    ),
+    'primary key' => array('post'),
+    'indexes' => array(
+      'archived' => array('archived'),
+      'updated' => array('updated'),
+    ),
+  );
+
+  // Yeah, forget this. No reason to ever change this prefix.
+  foreach ($schema as $name => $table) {
+    $new["ppp_$name"] = $table;
+  }
+  $schema = $new;
+
+  return $schema;
+}
+
+
+/**
+ * Implementation of hook_install().
+ */
+function ppp_db_install() {
+  $query = db_insert('ppp_user_field')->fields(array('name', 'label'));
+  foreach(_ppp_db_profile_field_info() as $name => $label) {
+    $query->values(array('name' => $name, 'label' => $label));
+  }
+  $query->execute();
+
+  drupal_set_message(t('PPP Database Schema installed.'));
+}
+
+/**
+ * Current fields on user profiles.
+ */
+function _ppp_db_profile_field_info() {
+  return array(
+    'displayed_name' => 'Publically Displayed Name',
+    'title'          => 'Title',
+    'email'          => 'Email',
+    'url'            => 'Homepage',
+    'im_icq'         => 'IM (ICQ)',
+    'im_yahoo'       => 'IM (Yahoo)',
+    'im_msn'         => 'IM (MSN)',
+    'im_aim'         => 'IM (AIM)',
+    'birthday'       => 'Birthday',
+    'occupation'     => 'Occupation',
+    'hobbies'        => 'Hobbies',
+    'location'       => 'Location',
+    'real_name'      => 'Real Name',
+    'fav_game'       => 'Favorite Spiderweb Game',
+    'signature'      => 'Signature',
+  );    
+}

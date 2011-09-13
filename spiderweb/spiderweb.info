@@ -1,0 +1,11 @@
+; $Id: spiderweb.info 507 2011-09-13 14:23:38Z arancaytar $
+
+name = Spiderweb Link
+description = Fetches content from the Spiderweb UBB Forums.
+package = Pied Piper Project
+core = 8.x
+
+files[] = spiderweb.module
+files[] = spiderweb.parse.inc
+files[] = spiderweb.http.inc
+files[] = spiderweb.html.inc
