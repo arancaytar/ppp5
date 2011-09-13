@@ -67,7 +67,7 @@ define('HDOM_INFO_INNER', 5);
 define('HDOM_INFO_OUTER', 6);
 define('HDOM_INFO_ENDSPACE', 7);
 define('DEFAULT_TARGET_CHARSET', NULL);
-define('DEFAULT_BR_TEXT', NULL); 
+define('DEFAULT_BR_TEXT', NULL);
 
 /**
  * Main parse function.
@@ -285,7 +285,6 @@ class spiderweb_html_node {
     if ($this->tag === 'root') {
 
       return $this->innertext();
-
     }
 
     // trigger callback
@@ -296,7 +295,6 @@ class spiderweb_html_node {
     if (isset($this->_[HDOM_INFO_OUTER])) {
 
       return $this->_[HDOM_INFO_OUTER];
-
     }
     if (isset($this->_[HDOM_INFO_TEXT])) {
       return $this->dom->restore_noise($this->_[HDOM_INFO_TEXT]);
@@ -466,7 +464,7 @@ class spiderweb_html_node {
     if (is_null($idx)) {
       return $found;
     }
-    elseif ($idx<0) {
+    elseif ($idx < 0) {
       $idx = count($found) + $idx;
     }
     return (isset($found[$idx])) ? $found[$idx] : NULL;
@@ -726,7 +724,7 @@ class spiderweb_html_node {
         if (isset($this->_[HDOM_INFO_TEXT])) {
           return $this->_[HDOM_INFO_TEXT] = $value;
         }
-      return $this->_[HDOM_INFO_INNER] = $value;
+        return $this->_[HDOM_INFO_INNER] = $value;
     }
     if (!isset($this->attr[$name])) {
       $this->_[HDOM_INFO_SPACE][] = array(' ', '', '');
@@ -1250,7 +1248,6 @@ class spiderweb_html_parser {
       if ($this->char === '>') {
 
         $node->_[HDOM_INFO_TEXT] .= '>';
-
       }
       $this->link_nodes($node, FALSE);
       // next
@@ -1468,7 +1465,6 @@ class spiderweb_html_parser {
     if ($pos === $this->pos) {
 
       return '';
-
     }
     $pos_old    = $this->pos;
     $this->char = $this->doc[$pos];
@@ -1493,7 +1489,6 @@ class spiderweb_html_parser {
       if ($pos === $this->pos) {
 
         return '';
-
       }
 
       if ($this->doc[$pos - 1] === '\\') {

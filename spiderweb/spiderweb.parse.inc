@@ -1,6 +1,7 @@
 <?php
 // $Id: spiderweb.parse.inc 478 2010-08-16 11:58:31Z arancaytar $
 
+
 /**
  * @file spiderweb.parse.inc
  *   Contains all parser functions of the Spiderweb link.
@@ -20,11 +21,12 @@ define('TIME_OFFSET', 9 * 3600);
 function spiderweb_parse_main_page($data) {
   module_load_include('inc', 'spiderweb', 'spiderweb.parse');
   $main = new stdClass();
-  $main->fora = array(); // Yes. Fora.
+  // Yes. Fora.
+  $main->fora = array();
   $main->categories = array();
 
   $html = spiderweb_html_parse($data);
-  foreach($html->find('thead') as $cat) {
+  foreach ($html->find('thead') as $cat) {
     $link = $cat->find('a', 0);
     $id = trim(strrchr($link->href, '='), '=');
     $name = $link->innertext;
@@ -33,20 +35,23 @@ function spiderweb_parse_main_page($data) {
 
   $cats = array_keys($main->categories);
 
-  foreach($html->find('tbody') as $i => $cat) {
+  foreach ($html->find('tbody') as $i => $cat) {
     $rows = $cat->children;
-    array_shift($rows); // table headers
+    // table headers
+    array_shift($rows);
     foreach ($rows as $row) {
       $link = $row->find('a', 0);
-      if (!preg_match('/Board=([0-9]+)/', $link->href, $match)) continue;
-      $id = $match[1];
-      $name = $link->innertext;
-      $description = trim($row->find('div.forumdescript', 0)->innertext);
+      if (!preg_match('/Board=([0-9]+)/', $link->href, $match)) {
+        continue;
+      }
+      $id              = $match[1];
+      $name            = $link->innertext;
+      $description     = trim($row->find('div.forumdescript', 0)->innertext);
       $main->fora[$id] = (object)array(
-        'fid'         => $id,
-        'name'        => $name,
+        'fid' => $id,
+        'name' => $name,
         'description' => $description,
-        'category'    => $cats[$i],
+        'category' => $cats[$i],
       );
     }
   }
@@ -67,8 +72,8 @@ function spiderweb_parse_forum($data) {
   module_load_include('inc', 'spiderweb', 'spiderweb.parse');
   $html = spiderweb_html_parse($data);
 
-  $forum = new stdClass();
-  $forum->pages = 1;
+  $forum         = new stdClass();
+  $forum->pages  = 1;
   $forum->topics = array();
 
   if (preg_match('/Page [0-9]+ of ([0-9+])/', $html->find('td.tdheader', 0)->innertext, $match)) {
@@ -76,10 +81,11 @@ function spiderweb_parse_forum($data) {
   }
 
   $topics = $html->find('table.t_inner', 1)->children;
-  array_shift($topics); // headers.
+  // headers.
+  array_shift($topics);
   foreach ($topics as $topic) {
-    $cells = $topic->find('td');
-    $links = $cells[2]->find('a');
+    $cells  = $topic->find('td');
+    $links  = $cells[2]->find('a');
     $author = 0;
 
     foreach ($links as $link) {
@@ -91,13 +97,13 @@ function spiderweb_parse_forum($data) {
 
     $date = $topic->find('span.date', 0)->innertext;
     // obsolete when the user uses non-relative times.
-    // if ($time = $topic->find('span.time', 0)) $date = str_replace("at", "", "$date $time->innertext");
+    // if ($time = $topic->find('span.time', 0)) {   $date = str_replace("at", "", "$date $time->innertext"); }
     $t = (object)array(
-      'post'     => ltrim(strrchr($topic->id, '-'), '-'),
-      'title'    => html_entity_decode($links[0]->innertext),
-      'author'   => $author,
-      'length'   => trim($cells[3]->innertext) + 1,
-      'updated'  => strtotime($date) - TIME_OFFSET,
+      'post' => ltrim(strrchr($topic->id, '-'), '-'),
+      'title' => html_entity_decode($links[0]->innertext),
+      'author' => $author,
+      'length' => trim($cells[3]->innertext) + 1,
+      'updated' => strtotime($date) - TIME_OFFSET,
     );
     if (!strtotime($date)) {
       var_dump($date, check_plain($topic->innertext));
@@ -134,6 +140,7 @@ function spiderweb_parse_topic($data) {
      * If the user has no moderation rights on this thread, "locked" and "sticky" flags will be left FALSE.
      */
 
+
     if (preg_match('/ubb=(un)?stickpost/', $link->href, $match)) {
       $topic->sticky = $match[1] == 'un';
     }
@@ -163,12 +170,12 @@ function spiderweb_parse_topic($data) {
     }
   }
 
-  $topic->post = $topic->posts[0]->pid;
-  $topic->length = count($topic->posts);
+  $topic->post    = $topic->posts[0]->pid;
+  $topic->length  = count($topic->posts);
   $topic->started = $topic->posts[0]->created;
-  $topic->ended = $topic->posts[$topic->length - 1]->created;
-  $topic->author = $topic->posts[0]->author;
-  $topic->icon = $topic->posts[0]->icon;
+  $topic->ended   = $topic->posts[$topic->length - 1]->created;
+  $topic->author  = $topic->posts[0]->author;
+  $topic->icon    = $topic->posts[0]->icon;
 
   return $topic;
 }
@@ -185,10 +192,12 @@ function spiderweb_parse_topic($data) {
  */
 function spiderweb_parse_post($data) {
   $meta = $data->find('td.subjecttable span span');
-  if (count($meta) != 2) return FALSE;
+  if (count($meta) != 2) {
+    return FALSE;
+  }
 
-  $post = new stdclass();
-  $post->pid = trim($meta[0]->innertext, '#');
+  $post          = new stdclass();
+  $post->pid     = trim($meta[0]->innertext, '#');
   $post->created = strtotime($meta[1]->innertext) - TIME_OFFSET;
 
   $img = $data->find('td.subjecttable a img', 0);
@@ -209,10 +218,12 @@ function spiderweb_parse_post($data) {
  * @param object $dom
  *   An object, being the DOM element whose inner content should be reversed.
  *   Alternatively, a string.
- */ 
+ */
 function spiderweb_parse_bbcode_reverse($dom) {
   module_load_include('inc', 'spiderweb', 'spiderweb.html');
-  if (!is_object($dom)) $dom = spiderweb_html_parse($dom);
+  if (!is_object($dom)) {
+    $dom = spiderweb_html_parse($dom);
+  }
   $result = $dom->innertext;
 
   foreach ($dom->find('div.ubbcode-block') as $q) {
@@ -223,7 +234,7 @@ function spiderweb_parse_bbcode_reverse($dom) {
     }
     else {
       $author = trim(strchr($q->find('div.ubbcode-header', 0)->innertext, ':'), ': ');
-      $quote = $author ? "[quote={$author}]{$body->innertext}[/quote]" : "[quote]{$body->innertext}[/quote]";
+      $quote  = $author ? "[quote={$author}]{$body->innertext}[/quote]" : "[quote]{$body->innertext}[/quote]";
       $result = str_replace($q->outertext, $quote, $result);
     }
   }
@@ -286,30 +297,30 @@ function spiderweb_parse_bbcode_reverse($dom) {
  */
 function spiderweb_parse_icon_reverse($image) {
   static $icons = array(
-    'thumbs_down.gif' =>  1,
-    'cool.gif'        =>  2,
-    'sleep.gif'       =>  3,
-    'sick.gif'        =>  4,
-    'mad.gif'         =>  5,
-    'lightbulb.gif'   =>  6,
-    'eek.gif'         =>  7,
-    'exclamation.gif' =>  8,
-    'confused.gif'    =>  9,
-    'cry.gif'         => 10,
-    'grin.gif'        => 11,
-    'thumbs_up.gif'   => 12,
-    'book.gif'        => 13,
-    'tired.gif'       => 14,
-    'smirk.gif'       => 15,
-    'crazy.gif'       => 16,
-    'whistle.gif'     => 17,
-    'shocked.gif'     => 18,
-    'blush.gif'       => 19,
-    'wink.gif'        => 20,
-    'frown.gif'       => 21,
-    'laugh.gif'       => 22,
-    'smile.gif'       => 23,
-    'tongue.gif '     => 24,
+    'thumbs_down.gif' => 1,
+    'cool.gif' => 2,
+    'sleep.gif' => 3,
+    'sick.gif' => 4,
+    'mad.gif' => 5,
+    'lightbulb.gif' => 6,
+    'eek.gif' => 7,
+    'exclamation.gif' => 8,
+    'confused.gif' => 9,
+    'cry.gif' => 10,
+    'grin.gif' => 11,
+    'thumbs_up.gif' => 12,
+    'book.gif' => 13,
+    'tired.gif' => 14,
+    'smirk.gif' => 15,
+    'crazy.gif' => 16,
+    'whistle.gif' => 17,
+    'shocked.gif' => 18,
+    'blush.gif' => 19,
+    'wink.gif' => 20,
+    'frown.gif' => 21,
+    'laugh.gif' => 22,
+    'smile.gif' => 23,
+    'tongue.gif ' => 24,
   );
 
   return isset($icons[$image]) ? $icons[$image] : 0;
@@ -327,27 +338,27 @@ function spiderweb_parse_icon_reverse($image) {
  */
 function spiderweb_parse_smiley_reverse($image) {
   static $smileys = array(
-    'rolleyesold.gif' => ':rolleyes:', 
-    'tongueold.gif'   => ':P',
-    'sadold.gif'      => ':(',
-    'eek.gif'         => ':eek:',
-    'mad.gif'         => ':mad',
-    'cool.gif'        => ':cool:',
-    'blush.gif'       => ':blush:', 
-    'crazy.gif'       => ':crazy',
-    'laugh.gif'       => ':lol:',
-    'shocked.gif'     => ':o',
-    'smirk.gif'       => ':/',
-    'confused.gif'    => ':confused:',
-    'grin.gif'        => ':D',
-    'wink.gif'        => ';)',
-    'cry.gif'         => ':cry:',
-    'sick.gif'        => ':sick:',
-    'sleep.gif'       => ':sleep:',
-    'tired.gif'       => ':tired:',
-    'whistle.gif'     => ':whistle:',
-    'smileold.gif'    => ':)',
-    'smile.gif'       => ':)',
+    'rolleyesold.gif' => ':rolleyes:',
+    'tongueold.gif' => ':P',
+    'sadold.gif' => ':(',
+    'eek.gif' => ':eek:',
+    'mad.gif' => ':mad',
+    'cool.gif' => ':cool:',
+    'blush.gif' => ':blush:',
+    'crazy.gif' => ':crazy',
+    'laugh.gif' => ':lol:',
+    'shocked.gif' => ':o',
+    'smirk.gif' => ':/',
+    'confused.gif' => ':confused:',
+    'grin.gif' => ':D',
+    'wink.gif' => ';)',
+    'cry.gif' => ':cry:',
+    'sick.gif' => ':sick:',
+    'sleep.gif' => ':sleep:',
+    'tired.gif' => ':tired:',
+    'whistle.gif' => ':whistle:',
+    'smileold.gif' => ':)',
+    'smile.gif' => ':)',
   );
   return isset($smileys[$image]) ? $smileys[$image] : FALSE;
 }

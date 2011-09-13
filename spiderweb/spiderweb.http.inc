@@ -1,11 +1,12 @@
 <?php
 // $Id: spiderweb.http.inc 487 2010-08-16 23:15:19Z arancaytar $
 
+
 /**
  * @file spiderweb.http.inc
  *   Contains functions for connecting to the Spiderweb forums via HTTP.
  */
- 
+
 define('SPIDERWEB_URL', 'http://www.spiderwebforums.com/forum');
 define('SPIDERWEB_CHARSET', 'WINDOWS-1252');
 
@@ -21,7 +22,7 @@ define('SPIDERWEB_CHARSET', 'WINDOWS-1252');
  */
 function spiderweb_cookies($new_cookies = array()) {
   static $cookies = array();
-  
+
   if ($new_cookies) {
     foreach ($new_cookies as $name => $info) {
       $cookies[$name] = $info;
@@ -29,11 +30,11 @@ function spiderweb_cookies($new_cookies = array()) {
     variable_set('spiderweb_cookies', $cookies);
     return;
   }
-  
+
   if (empty($cookies)) {
     $cookies = variable_get('spiderweb_cookies', array());
   }
-  
+
   $out = array();
   foreach ($cookies as $name => $info) {
     $out[] = "$name={$info['value']}";
@@ -49,6 +50,7 @@ function spiderweb_cookies($new_cookies = array()) {
  *   The login name of the account to use.
  * @param string $password
  *   The password of the account.
+ *
  * @return
  *   The resulting session cookies.
  */
@@ -62,7 +64,7 @@ function spiderweb_login($user, $pass) {
     'ON_COMPLETION_URL' => '',
     'buttlogin' => 'Log In',
   );
-  
+
   $response = spiderweb_post($form);
   return $response->cookies;
 }
@@ -90,7 +92,7 @@ function spiderweb_post($fields, $page = 'ubbthreads.php', $cookies = NULL) {
     ),
     'data' => drupal_http_build_query($fields),
   );
-  return drupal_http_request($url, $options); 
+  return drupal_http_request($url, $options);
 }
 
 /**
@@ -105,11 +107,11 @@ function spiderweb_post($fields, $page = 'ubbthreads.php', $cookies = NULL) {
 function spiderweb_get($fields, $page = 'ubbthreads.php', $cookies = NULL) {
   $url = SPIDERWEB_URL . "/$page";
   $options = array(
-   'headers' => array('Cookie' => $cookies),
+    'headers' => array('Cookie' => $cookies),
   );
   $query = drupal_http_build_query($fields);
   $response = drupal_http_request("$url?$query", $options);
-  
+
   // Make sure we get back valid UTF-8.
   // We can't trust UBB's headers. They claim ISO-8859-1, but send Cp1252/Windows.
   $response->data = iconv(SPIDERWEB_CHARSET, 'UTF-8', $response->data);
