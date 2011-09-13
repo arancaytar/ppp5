@@ -7,7 +7,7 @@
  */
 
 define('TIME_OFFSET', 9 * 3600);
- 
+
 /**
  * Parse the front page of the board and retrieve category structure.
  *
@@ -22,7 +22,7 @@ function spiderweb_parse_main_page($data) {
   $main = new stdClass();
   $main->fora = array(); // Yes. Fora.
   $main->categories = array();
-  
+
   $html = spiderweb_html_parse($data);
   foreach($html->find('thead') as $cat) {
     $link = $cat->find('a', 0);
@@ -30,9 +30,9 @@ function spiderweb_parse_main_page($data) {
     $name = $link->innertext;
     $main->categories[$id] = (object)array('cid' => $id, 'name' => $name);
   }
-  
+
   $cats = array_keys($main->categories);
-  
+
   foreach($html->find('tbody') as $i => $cat) {
     $rows = $cat->children;
     array_shift($rows); // table headers
@@ -81,7 +81,7 @@ function spiderweb_parse_forum($data) {
     $cells = $topic->find('td');
     $links = $cells[2]->find('a');
     $author = 0;
-    
+
     foreach ($links as $link) {
       if (preg_match('/User=([0-9+])/', $link->href, $match)) {
         $author = $match[1];
@@ -120,9 +120,9 @@ function spiderweb_parse_forum($data) {
 function spiderweb_parse_topic($data) {
   module_load_include('inc', 'spiderweb', 'spiderweb.html');
   $html = spiderweb_html_parse($data);
-  
+
   $topic = (object)array();
-  
+
   foreach ($html->find('#options_popup a') as $link) {
     if (preg_match('/ubb=printthread.*Board=([0-9]+).*main=([0-9]+)/', $link->href, $match)) {
       $topic->forum = $match[1];
@@ -155,21 +155,21 @@ function spiderweb_parse_topic($data) {
       // Denormalize these IDs downwards:
       $post->topic = $topic->tid;
       $post->forum = $topic->forum;
-      
+
       preg_match('/User=([0-9]+)/', $html->find("#profile_popup_{$post->pid} a", 0)->href, $match);
       $post->author = $match[1];
-      
+
       $topic->posts[] = $post;
     }
   }
-  
+
   $topic->post = $topic->posts[0]->pid;
   $topic->length = count($topic->posts);
   $topic->started = $topic->posts[0]->created;
   $topic->ended = $topic->posts[$topic->length - 1]->created;
   $topic->author = $topic->posts[0]->author;
   $topic->icon = $topic->posts[0]->icon;
-  
+
   return $topic;
 }
 
@@ -190,16 +190,16 @@ function spiderweb_parse_post($data) {
   $post = new stdclass();
   $post->pid = trim($meta[0]->innertext, '#');
   $post->created = strtotime($meta[1]->innertext) - TIME_OFFSET;
-  
+
   $img = $data->find('td.subjecttable a img', 0);
   $post->icon = isset($img->src) ? spiderweb_parse_icon_reverse(basename($img->src)) : 0;
-  
+
   preg_match('/\(([0-9\.]+)\)/', $data->find('td.author-content span.small i', 0)->innertext, $match);
   $post->ip = $match[1];
-  
+
   $post->body = spiderweb_parse_bbcode_reverse($data->find('div.post_inner div', 0));
-  
-  // Obviously, since topic and author are denormalized downward, they must be added by the caller.  
+
+  // Obviously, since topic and author are denormalized downward, they must be added by the caller.
   return $post;
 }
 
@@ -227,10 +227,10 @@ function spiderweb_parse_bbcode_reverse($dom) {
       $result = str_replace($q->outertext, $quote, $result);
     }
   }
-  
+
   // Reparse now that the quotes are removed.
   $dom = spiderweb_html_parse($result);
-  
+
   foreach ($dom->find('span') as $span) {
     list($property, $value) = explode(': ', $span->style, 2);
     $content = $span->innertext;
@@ -254,12 +254,12 @@ function spiderweb_parse_bbcode_reverse($dom) {
     }
     $result = str_replace($span->outertext, $tag, $result);
   }
-  
+
   foreach ($dom->find('a') as $a) {
     $url = "[url={$a->href}]{$a->innertext}[/url]";
     $result = str_replace($a->outertext, $url, $result);
   }
-  
+
   foreach ($dom->find('img') as $img) {
     if (dirname($img->src) == '/forum/images/graemlins/default') {
       $out = spiderweb_parse_smiley_reverse(basename($img->src));
@@ -269,7 +269,7 @@ function spiderweb_parse_bbcode_reverse($dom) {
     }
     $result = str_replace($img->outertext, $out, $result);
   }
-  
+
   $result = str_replace('<br />', "\n", $result);
   $result = html_entity_decode($result);
   return $result;
@@ -349,7 +349,6 @@ function spiderweb_parse_smiley_reverse($image) {
     'smileold.gif'    => ':)',
     'smile.gif'       => ':)',
   );
-  
   return isset($smileys[$image]) ? $smileys[$image] : FALSE;
 }
 
