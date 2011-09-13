@@ -18,11 +18,12 @@ define('TIME_OFFSET', 9 * 3600);
  *   object { array $categories [ int $id => object $category { int $cid, string $name } ], array $fora [ int $id => object $forum ] }
  */
 function spiderweb_parse_main_page($data) {
+  module_load_include('inc', 'spiderweb', 'spiderweb.parse');
   $main = new stdClass();
   $main->fora = array(); // Yes. Fora.
   $main->categories = array();
   
-  $html = module_invoke('simpledom', 'parse_html', $data);
+  $html = spiderweb_html_parse($data);
   foreach($html->find('thead') as $cat) {
     $link = $cat->find('a', 0);
     $id = trim(strrchr($link->href, '='), '=');
@@ -63,7 +64,8 @@ function spiderweb_parse_main_page($data) {
  *   An array of topics [ int $post => object $topic { int $post, string $title, int $author, int $length, int $updated }].
  */
 function spiderweb_parse_forum($data) {
-  $html = module_invoke('simpledom', 'parse_html', $data);
+  module_load_include('inc', 'spiderweb', 'spiderweb.parse');
+  $html = spiderweb_html_parse($data);
 
   $forum = new stdClass();
   $forum->pages = 1;
@@ -116,7 +118,8 @@ function spiderweb_parse_forum($data) {
  *   A topic object, including a $posts array.
  */
 function spiderweb_parse_topic($data) {
-  $html = module_invoke('simpledom', 'parse_html', $data);
+  module_load_include('inc', 'spiderweb', 'spiderweb.html');
+  $html = spiderweb_html_parse($data);
   
   $topic = (object)array();
   
@@ -125,15 +128,15 @@ function spiderweb_parse_topic($data) {
       $topic->forum = $match[1];
       $topic->tid = $match[2];
     }
-    
+
     /* WARNING: The following code PRESUMES that the data being parsed
      * was requested by an ADMINISTRATOR on SW, or a MODERATOR on the forum the thread was in.
      * If the user has no moderation rights on this thread, "locked" and "sticky" flags will be left FALSE.
      */
-    
+
     if (preg_match('/ubb=(un)?stickpost/', $link->href, $match)) {
       $topic->sticky = $match[1] == 'un';
-    }    
+    }
     if (preg_match('/ubb=do(open|close)threads/', $link->href, $match)) {
       $topic->closed = $match[1] == 'open';
     }
@@ -141,11 +144,11 @@ function spiderweb_parse_topic($data) {
 
   // Yes, we calculate the string length of a constant here. You will thank me when you next need to maintain this, Aran.
   $topic->title = substr($html->find('title', 0)->innertext, 0, -1 * strlen(' - Spiderweb Software Forum'));
-  
+
   // We have now parsed all the five "normal" topic properties. The other six are aggregated from post content, which is now parsed.
-  
+
   $topic->posts = array();
-  
+
   foreach ($html->find('table.t_outer > tr > td > table.t_inner > tr > td > table') as $post_data) {
     $post = spiderweb_parse_post($post_data);
     if ($post) {
@@ -208,7 +211,8 @@ function spiderweb_parse_post($data) {
  *   Alternatively, a string.
  */ 
 function spiderweb_parse_bbcode_reverse($dom) {
-  if (!is_object($dom)) $dom = module_invoke('simpledom', 'parse_html', $dom);
+  module_load_include('inc', 'spiderweb', 'spiderweb.html');
+  if (!is_object($dom)) $dom = spiderweb_html_parse($dom);
   $result = $dom->innertext;
 
   foreach ($dom->find('div.ubbcode-block') as $q) {
@@ -225,7 +229,7 @@ function spiderweb_parse_bbcode_reverse($dom) {
   }
   
   // Reparse now that the quotes are removed.
-  $dom = simpledom_parse_html($result);
+  $dom = spiderweb_html_parse($result);
   
   foreach ($dom->find('span') as $span) {
     list($property, $value) = explode(': ', $span->style, 2);
