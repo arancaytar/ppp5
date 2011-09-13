@@ -97,7 +97,9 @@ function spiderweb_parse_forum($data) {
 
     $date = $topic->find('span.date', 0)->innertext;
     // obsolete when the user uses non-relative times.
-    // if ($time = $topic->find('span.time', 0)) {   $date = str_replace("at", "", "$date $time->innertext"); }
+    if ($time = $topic->find('span.time', 0)) {
+      $date = str_replace("at", "", "$date $time->innertext");
+    }
     $t = (object)array(
       'post' => ltrim(strrchr($topic->id, '-'), '-'),
       'title' => html_entity_decode($links[0]->innertext),
@@ -134,20 +136,17 @@ function spiderweb_parse_topic($data) {
       $topic->forum = $match[1];
       $topic->tid = $match[2];
     }
-
-    /* WARNING: The following code PRESUMES that the data being parsed
-     * was requested by an ADMINISTRATOR on SW, or a MODERATOR on the forum the thread was in.
-     * If the user has no moderation rights on this thread, "locked" and "sticky" flags will be left FALSE.
-     */
-
-
-    if (preg_match('/ubb=(un)?stickpost/', $link->href, $match)) {
-      $topic->sticky = $match[1] == 'un';
-    }
-    if (preg_match('/ubb=do(open|close)threads/', $link->href, $match)) {
-      $topic->closed = $match[1] == 'open';
-    }
   }
+
+  if ($html->find('td.subjecttable img[source=/forum/images/general/default/lock.gif]', 0)) {
+    $topic->closed = TRUE;
+  }
+  else $topic->closed = FALSE;
+
+  if (preg_match('/sticky=1/', $html->find('div#prev-next-links a', 0)->href)) {
+    $topic->sticky = TRUE;
+  }
+  else $topic->sticky = FALSE;
 
   // Yes, we calculate the string length of a constant here. You will thank me when you next need to maintain this, Aran.
   $topic->title = substr($html->find('title', 0)->innertext, 0, -1 * strlen(' - Spiderweb Software Forum'));
@@ -192,19 +191,26 @@ function spiderweb_parse_topic($data) {
  */
 function spiderweb_parse_post($data) {
   $meta = $data->find('td.subjecttable span span');
-  if (count($meta) != 2) {
-    return FALSE;
-  }
+  if (count($meta) < 2) return FALSE;
 
   $post          = new stdclass();
   $post->pid     = trim($meta[0]->innertext, '#');
-  $post->created = strtotime($meta[1]->innertext) - TIME_OFFSET;
+
+  // Relative timestamps consist of two spans, and the "at" breaks strtotime.
+  $date = $meta[1]->innertext;
+  if (count($meta) > 2) {
+    $date = str_replace('at', '', $date) . $meta[2]->innertext;
+  }
+  $post->created = strtotime($date) - TIME_OFFSET;
 
   $img = $data->find('td.subjecttable a img', 0);
   $post->icon = isset($img->src) ? spiderweb_parse_icon_reverse(basename($img->src)) : 0;
 
-  preg_match('/\(([0-9\.]+)\)/', $data->find('td.author-content span.small i', 0)->innertext, $match);
-  $post->ip = $match[1];
+  if ($ip = $data->find('td.author-content span.small i', 0)) {
+    preg_match('/\(([0-9\.]+)\)/', $ip->innertext, $match);
+    $post->ip = $match[1];
+  }
+  else $post->ip = '';
 
   $post->body = spiderweb_parse_bbcode_reverse($data->find('div.post_inner div', 0));
 
