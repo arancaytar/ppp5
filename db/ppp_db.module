@@ -1,6 +1,6 @@
 <?php
 // $Id: ppp_db.module 478 2010-08-16 11:58:31Z arancaytar $
 
-define('PPP_DB_ARTIFICIAL_PREFIX', 'ppp_');
 
+define('PPP_DB_ARTIFICIAL_PREFIX', 'ppp_');
 

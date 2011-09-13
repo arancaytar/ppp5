@@ -1,6 +1,7 @@
 <?php
 // $Id: ppp_db.load.inc 478 2010-08-16 11:58:31Z arancaytar $
 
+
 /**
  * @file ppp_db.load.inc
  *   Contains all functions that load data from the PPP database.
@@ -19,7 +20,8 @@
  *   A fully loaded user object whose profile fields show when they were discovered and lost.
  */
 function ppp_db_load_user($uid, $time = NULL) {
-  $uid = (int)$uid; // Protect input
+  // Protect input
+  $uid = (int)$uid;
   $user = db_query('SELECT * FROM {ppp_user} WHERE `uid` = :uid', array(':uid' => $uid))->fetch();
   if (!$user) {
     return FALSE;
@@ -40,21 +42,20 @@ function ppp_db_load_user($uid, $time = NULL) {
     $time = (int)$time;
     $query->condition('created', $time, '<');
 
-    $lost = db_or()
-      ->condition('expired', $time, '>')
-      ->condition('`expired` IS NULL', array(), NULL);
+    $lost = db_or()->condition('expired', $time, '>')->condition('`expired` IS NULL', array(), NULL);
 
     $query->condition($lost);
   }
   else {
-    $query-condition('`expired` IS NULL', array(), NULL);
+    $query - condition('`expired` IS NULL', array(), NULL);
   }
 
   $user->fields = array();
   $fields = $query->execute();
 
   while ($field = $fields->fetch()) {
-    $user->fields[$field->fid] = $field; // How often can I say field on one line?
+    // How often can I say field on one line?
+    $user->fields[$field->fid] = $field;
   }
 
   return $user;
@@ -129,12 +130,12 @@ function ppp_db_load_fora($category = NULL) {
   $query->addField('f', 'name');
   $query->addField('f', 'description');
   $query->addField('f', 'category');
-  
+
   if ($category) {
     $query->condition('category', (int)$category);
   }
   $result = $query->execute();
-  
+
   $fora = array();
   while ($forum = $result->fetch()) {
     $fora[$forum->fid] = $forum;
@@ -149,11 +150,11 @@ function ppp_db_load_fora($category = NULL) {
   $query->condition('forum', array_keys($fora), 'IN');
   $query->groupBy('forum');
   $result = $query->execute();
-  
+
   while ($stat = $result->fetch()) {
     $stats[$stat->forum] = $stat;
   }
-  
+
   foreach ($fora as $fid => $forum) {
     if (isset($stats[$fid])) {
       $fora[$fid]->posts = $stats[$fid]->posts;
@@ -172,9 +173,9 @@ function ppp_db_load_lastpost($forum) {
   $query->addField('t', 'tid');
   $query->addField('t', 'title');
   $query->addField('t', 'ended');
-  
+
   $query->join('post', 'p', 't.tid = p.topic');
-  
+
   $query->addField('p', 'author');
   $query->orderBy('t.ended', 'desc');
   $query->range(0, 1);
@@ -213,7 +214,7 @@ function ppp_db_load_categories() {
  */
 function ppp_db_load_posts($condition, $sort = array(), $range = array()) {
   $query = db_select('ppp_post', 'p');
-  
+
   $query->addField('p', 'pid');
   $query->addField('p', 'topic');
   $query->addField('p', 'forum');
@@ -233,7 +234,7 @@ function ppp_db_load_posts($condition, $sort = array(), $range = array()) {
     $query->range((int)$range['start'], (int)$range['count']);
   }
   $result = $query->execute();
-  
+
   $posts = array();
   while ($row = $result->fetch()) {
     $posts[$row->pid] = $row;
@@ -267,7 +268,7 @@ function ppp_db_load_topics($condition, $sort = array(), $range = array()) {
   $query->addField('t', 'started');
   $query->addField('t', 'ended');
   $query->addField('t', 'icon');
-  
+
   foreach ($condition as $field => $value) {
     $query->condition($field, $value);
   }
@@ -278,7 +279,7 @@ function ppp_db_load_topics($condition, $sort = array(), $range = array()) {
     $query->range((int)$range['start'], (int)$range['count']);
   }
   $result = $query->execute();
-  
+
   $topics = array();
   while ($row = $result->fetch()) {
     $topics[$row->tid] = $row;
@@ -301,17 +302,16 @@ function ppp_db_load_crawl() {
   $query->addField('p', 'author');
   $query->addField('p', 'length');
   $query->addField('p', 'title');
-  
-  $condition = db_or()
-    ->condition('`archived` < `updated`', array(), NULL)
-    ->condition('`archived` IS NULL', array(), NULL);
-  
+
+  $condition = db_or()->condition('`archived` < `updated`', array(), NULL)->condition('`archived` IS NULL', array(), NULL);
+
   $query->condition($condition);
   $result = $query->execute();
-  
+
   $topics = array();
   while ($row = $result->fetch()) {
     $topics[$row->post] = $row;
   }
   return $topics;
 }
+

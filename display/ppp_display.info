@@ -10,3 +10,4 @@ files[] = ppp_display.module
 files[] = ppp_display.pages.inc
 
 dependencies[] = ppp_db
+

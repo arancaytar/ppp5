@@ -9,3 +9,4 @@ dependencies[] = ppp_db
 dependencies[] = spiderweb
 
 files[] = piperbot.module
+
