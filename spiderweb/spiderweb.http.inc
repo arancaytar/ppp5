@@ -11,7 +11,6 @@ define('SPIDERWEB_CHARSET', 'WINDOWS-1252');
 
 /**
  * Get stored cookies, or store new cookie.
- * This function pre-quires that cookies have been set at some point.
  * It will not log in automatically.
  *
  * @param $new_cookies
@@ -50,6 +49,8 @@ function spiderweb_cookies($new_cookies = array()) {
  *   The login name of the account to use.
  * @param string $password
  *   The password of the account.
+ * @return
+ *   The resulting session cookies.
  */
 function spiderweb_login($user, $pass) {
   $form = array(
@@ -63,8 +64,7 @@ function spiderweb_login($user, $pass) {
   );
   
   $response = spiderweb_post($form);
-  var_dump($response);
-  spiderweb_cookies($response->cookies);
+  return $response->cookies;
 }
 
 /**
@@ -80,13 +80,13 @@ function spiderweb_login($user, $pass) {
  * @return
  *   A full HTTP response object as returned by drupal_http_request().
  */
-function spiderweb_post($fields, $page = 'ubbthreads.php') {
+function spiderweb_post($fields, $page = 'ubbthreads.php', $cookies = array()) {
   $url = SPIDERWEB_URL . "/$page";
   $options = array(
     'method' => 'POST',
     'headers' => array(
       'Content-Type' => 'application/x-www-form-urlencoded',
-      'Cookie' => spiderweb_cookies(),
+      'Cookie' => $cookies,
     ),
     'data' => drupal_http_build_query($fields),
   );
@@ -102,10 +102,10 @@ function spiderweb_post($fields, $page = 'ubbthreads.php') {
  * @return
  *   A full HTTP response object as returned by drupal_http_request().
  */
-function spiderweb_get($fields, $page = 'ubbthreads.php') {
+function spiderweb_get($fields, $page = 'ubbthreads.php', $cookies = array()) {
   $url = SPIDERWEB_URL . "/$page";
   $options = array(
-   'headers' => array('Cookie' => spiderweb_cookies()),
+   'headers' => array('Cookie' => $cookies),
   );
   $query = drupal_http_build_query($fields);
   $response = drupal_http_request("$url?$query", $options);
