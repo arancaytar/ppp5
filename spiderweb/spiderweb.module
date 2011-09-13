@@ -15,12 +15,13 @@
  *   string of HTML markup.
  */
 function spiderweb_grab_topic($pid, $page = 'all') {
+  module_load_include('inc', 'spiderweb', 'spiderweb.http');
   $form = array(
     'ubb' => 'showflat',
     'Number' => $pid,
     'page' => $page,
   );
-  $response = module_invoke('spiderweb', 'get', $form);
+  $response = spiderweb_get($form);
   return $response->data;
 }
 
@@ -39,11 +40,12 @@ function spiderweb_grab_topic($pid, $page = 'all') {
  *   An array of topic objects.
  */
 function spiderweb_index_forum($fid, $max_pages = 0) {
+  module_load_include('inc', 'spiderweb', 'spiderweb.parse');
   $total_pages = 1; // update this value later.
   $topics = array();
   for ($i = 1; $i <= $total_pages; $i++) {
     $data = spiderweb_grab_forum_page($fid, $i);
-    $forum = module_invoke('spiderweb', 'parse_forum', $data);
+    $forum = spiderweb_parse_forum($data);
     $total_pages = $max_pages ? min($max_pages, $forum->pages) : $forum->pages;
     $topics += $forum->topics;
   }
@@ -64,13 +66,14 @@ function spiderweb_index_forum($fid, $max_pages = 0) {
  *   The page as a string of HTML markup.
  */
 function spiderweb_grab_forum_page($forum, $page) {
+  module_load_include('inc', 'spiderweb', 'spiderweb.http');
   $form = array(
     'ubb' => 'postlist',
     'Board' => $forum,
     'page' => $page,
   );
   
-  $response = module_invoke('spiderweb', 'get', $form);
+  $response = spiderweb_get($form);
   return $response->data;
 }
 
@@ -81,8 +84,9 @@ function spiderweb_grab_forum_page($forum, $page) {
  *   string of HTML markup.
  */
 function spiderweb_grab_main_page() {
+  module_load_include('inc', 'spiderweb', 'spiderweb.http');
   $form = array('ubb' => 'cfrm');
-  $response = module_invoke('spiderweb', 'get', $form);
+  $response = spiderweb_get($form);
   return $response->data;
 }
 
@@ -96,44 +100,11 @@ function spiderweb_grab_main_page() {
  *   string a page of HTML markup
  */
 function spiderweb_grab_user($uid) {
+  module_load_include('inc', 'spiderweb', 'spiderweb.http');
   $form = array(
     'ubb' => 'showprofile',
     'User' => $uid,
   );
-  $response = module_invoke('spiderweb', 'get', $form);
+  $response = spiderweb_get($form);
   return $response->data;
 }
-
-/**
- * Grab a user page in the admin view. This shows all fields.
- * REQUIRES ADMIN PRIVILEGE.
- *
- * @param $uid
- *   int the user ID to be requested.
- *
- * @return
- *   string a page of HTML markup
- */
-function spiderweb_grab_user_edit($uid) {
-  $form = array(
-    'uid' => $uid,
-  );
-  $response = module_invoke('spiderweb', 'get', $form, 'admin/showuser.php');
-  return $response->data;
-}
-
-/* OBSOLETE.
-/**
- * Note: Because of a moronic design, the data returned by this function cannot
- * contain a reference to the forum the thread is in. This will have to be done by separate indexing.
- *
-function spiderweb_grab_topic_print($tid) {
-  $fields = array(
-    'ubb' => 'printthread',
-    'main' => $tid,
-    'type' => 'thread',
-  );
-  $response = spiderweb_get($fields);
-  return $response->data;
-}*/
-
