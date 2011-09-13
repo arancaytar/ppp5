@@ -80,7 +80,7 @@ function spiderweb_login($user, $pass) {
  * @return
  *   A full HTTP response object as returned by drupal_http_request().
  */
-function spiderweb_post($fields, $page = 'ubbthreads.php', $cookies = array()) {
+function spiderweb_post($fields, $page = 'ubbthreads.php', $cookies = NULL) {
   $url = SPIDERWEB_URL . "/$page";
   $options = array(
     'method' => 'POST',
@@ -102,7 +102,7 @@ function spiderweb_post($fields, $page = 'ubbthreads.php', $cookies = array()) {
  * @return
  *   A full HTTP response object as returned by drupal_http_request().
  */
-function spiderweb_get($fields, $page = 'ubbthreads.php', $cookies = array()) {
+function spiderweb_get($fields, $page = 'ubbthreads.php', $cookies = NULL) {
   $url = SPIDERWEB_URL . "/$page";
   $options = array(
    'headers' => array('Cookie' => $cookies),
