@@ -3,14 +3,14 @@
 
 
 /**
- * @file ppp_db.install
+ * @file ppp_data.install
  * Installation functions for PPP.
  */
 
 /**
  * Implementation of hook_schema().
  */
-function ppp_db_schema() {
+function ppp_data_schema() {
   $schema['topic'] = array(
     'description' => 'Each record is one archived topic. Topics are not stored until fully saved.',
     'fields' => array(
@@ -317,9 +317,9 @@ function ppp_db_schema() {
 /**
  * Implementation of hook_install().
  */
-function ppp_db_install() {
+function ppp_data_install() {
   $query = db_insert('ppp_user_field')->fields(array('name', 'label'));
-  foreach (_ppp_db_profile_field_info() as $name => $label) {
+  foreach (_ppp_data_profile_field_info() as $name => $label) {
     $query->values(array('name' => $name, 'label' => $label));
   }
   $query->execute();
@@ -330,7 +330,7 @@ function ppp_db_install() {
 /**
  * Current fields on user profiles.
  */
-function _ppp_db_profile_field_info() {
+function _ppp_data_profile_field_info() {
   return array(
     'displayed_name' => 'Publically Displayed Name',
     'title' => 'Title',

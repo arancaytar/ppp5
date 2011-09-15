@@ -3,7 +3,7 @@
 
 
 /**
- * @file ppp_db.save.inc
+ * @file ppp_data.save.inc
  *   Functions for saving PPP records to the database.
  */
 
@@ -22,7 +22,7 @@
  *    - bool sticky,
  *    - bool closed
  */
-function ppp_db_save_topic($topic) {
+function ppp_data_save_topic($topic) {
   $query = db_merge('ppp_topic');
   $query->key(array('tid' => (int)$topic->tid));
   $query->fields(array(
@@ -53,7 +53,7 @@ function ppp_db_save_topic($topic) {
  *     - int icon,
  *     - string ip
  */
-function ppp_db_save_post($post) {
+function ppp_data_save_post($post) {
   $query = db_merge('ppp_post');
   $query->key(array('pid' => (int)$post->pid));
   $query->fields(array(
@@ -78,7 +78,7 @@ function ppp_db_save_post($post) {
  *    - string description,
  *    - int category
  */
-function ppp_db_save_forum($forum) {
+function ppp_data_save_forum($forum) {
   $query = db_merge('ppp_forum');
   $query->key(array('fid' => (int)$forum->fid));
   $query->fields(array(
@@ -97,7 +97,7 @@ function ppp_db_save_forum($forum) {
  *    - int cid,
  *    - string name
  */
-function ppp_db_save_category($category) {
+function ppp_data_save_category($category) {
   $query = db_merge('ppp_category');
   $query->key(array('cid' => (int)$category->cid));
   $query->fields(array(
@@ -119,10 +119,10 @@ function ppp_db_save_category($category) {
  *   Optional values include:
  *    - string notes,
  */
-function ppp_db_save_user($user) {
-  module_load_include('inc', 'ppp_db', 'ppp_db.save');
-  $old_user = ppp_db_load_user($user->uid);
-  $fields = ppp_db_load_fields();
+function ppp_data_save_user($user) {
+  module_load_include('inc', 'ppp_data', 'ppp_data.save');
+  $old_user = ppp_data_load_user($user->uid);
+  $fields = ppp_data_load_fields();
 
   // If a user is already here, use a lot of intricate logic to update fields.
   if ($old_user) {
@@ -187,7 +187,7 @@ function ppp_db_save_user($user) {
  *   {int post, int archived for topics that are already saved}
  *   The latter has precedence, so an archived timestamp will cause other properties to be ignored.
  */
-function ppp_db_save_crawl($topic) {
+function ppp_data_save_crawl($topic) {
   if (empty($topic->archived)) {
     $query = db_merge('ppp_crawl');
     $query->key(array('post' => (int)$topic->post));

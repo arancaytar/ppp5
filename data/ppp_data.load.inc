@@ -3,7 +3,7 @@
 
 
 /**
- * @file ppp_db.load.inc
+ * @file ppp_data.load.inc
  *   Contains all functions that load data from the PPP database.
  */
 
@@ -19,7 +19,7 @@
  * @return
  *   A fully loaded user object whose profile fields show when they were discovered and lost.
  */
-function ppp_db_load_user($uid, $time = NULL) {
+function ppp_data_load_user($uid, $time = NULL) {
   // Protect input
   $uid = (int)$uid;
   $user = db_query('SELECT * FROM {ppp_user} WHERE `uid` = :uid', array(':uid' => $uid))->fetch();
@@ -67,7 +67,7 @@ function ppp_db_load_user($uid, $time = NULL) {
  * @return
  *   An array of [ int $fid => object { string $name, string $value }]
  */
-function ppp_db_load_fields() {
+function ppp_data_load_fields() {
   $query = db_query('SELECT `fid`, `name`, `label` FROM {ppp_user_field}');
   $fields = array();
   while ($row = $query->fetch()) {
@@ -85,7 +85,7 @@ function ppp_db_load_fields() {
  * @return
  *   A post object.
  */
-function ppp_db_load_post($pid) {
+function ppp_data_load_post($pid) {
   return db_query('SELECT * FROM {ppp_post} WHERE pid = :pid', array(':pid' => (int)$pid))->fetch();
 }
 
@@ -98,7 +98,7 @@ function ppp_db_load_post($pid) {
  * @return
  *   A topic object.
  */
-function ppp_db_load_topic($tid) {
+function ppp_data_load_topic($tid) {
   return new PPPTopic(db_query('SELECT * FROM {ppp_topic} WHERE tid = :tid', array(':tid' => (int)$tid))->fetch());
 }
 
@@ -111,7 +111,7 @@ function ppp_db_load_topic($tid) {
  * @return
  *   A forum object
  */
-function ppp_db_load_forum($fid) {
+function ppp_data_load_forum($fid) {
   return db_query('SELECT * FROM {ppp_forum} WHERE fid = :fid', array(':fid' => (int)$fid))->fetch();
 }
 
@@ -124,7 +124,7 @@ function ppp_db_load_forum($fid) {
  * @return
  *   An array of [ int fid : object forum { name, description, posts, topics, category } ]
  */
-function ppp_db_load_fora($category = NULL) {
+function ppp_data_load_fora($category = NULL) {
   $query = db_select('ppp_forum', 'f');
   $query->addField('f', 'fid');
   $query->addField('f', 'name');
@@ -168,7 +168,7 @@ function ppp_db_load_fora($category = NULL) {
 /**
  * Load the last post on a forum.
  */
-function ppp_db_load_lastpost($forum) {
+function ppp_data_load_lastpost($forum) {
   $query = db_select('ppp_topic', 't');
   $query->addField('t', 'tid');
   $query->addField('t', 'title');
@@ -188,7 +188,7 @@ function ppp_db_load_lastpost($forum) {
  * @return
  *   All categories as an array [ int cid : string name ]
  */
-function ppp_db_load_categories() {
+function ppp_data_load_categories() {
   static $cat = array();
   if (empty($cat)) {
     $query = db_query('SELECT * FROM {ppp_category}');
@@ -212,7 +212,7 @@ function ppp_db_load_categories() {
  * @return
  *   A post object.
  */
-function ppp_db_load_posts($condition, $sort = array(), $range = array()) {
+function ppp_data_load_posts($condition, $sort = array(), $range = array()) {
   $query = db_select('ppp_post', 'p');
 
   $query->addField('p', 'pid');
@@ -255,7 +255,7 @@ function ppp_db_load_posts($condition, $sort = array(), $range = array()) {
  * @return
  *   An array of [ int pid : object post ]
  */
-function ppp_db_load_topics($condition, $sort = array(), $range = array()) {
+function ppp_data_load_topics($condition, $sort = array(), $range = array()) {
   $query = db_select('ppp_topic', 't');
   $query->addField('t', 'tid');
   $query->addField('t', 'post');
@@ -293,7 +293,7 @@ function ppp_db_load_topics($condition, $sort = array(), $range = array()) {
  * @return
  *   An array of topics [ int post : object topic {int archived, int updated, int forum, int author, int length, string title}]
  */
-function ppp_db_load_crawl() {
+function ppp_data_load_crawl() {
   $query = db_select('ppp_crawl', 'p');
   $query->addField('p', 'post');
   $query->addField('p', 'archived');

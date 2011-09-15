@@ -2,7 +2,7 @@
 // $Id$
 
 /**
- * @file ppp_db.module
+ * @file ppp_data.module
  * Data object classes that allow dynamically loading associated information.
  */
 
@@ -45,8 +45,8 @@ class PPPForum extends PPPDataObject {
   }
 
   function load_topics($sort, $range) {
-    module_load_include('inc', 'ppp_db', 'ppp_db.load');
-    return ppp_db_load_posts(array('forum' => $this->fid), $sort, $range);
+    module_load_include('inc', 'ppp_data', 'ppp_data.load');
+    return ppp_data_load_posts(array('forum' => $this->fid), $sort, $range);
   }
 }
 
@@ -64,8 +64,8 @@ class PPPTopic extends PPPDataObject {
   }
 
   function load_posts($range) {
-    module_load_include('inc', 'ppp_db', 'ppp_db.load');
-    return ppp_db_load_posts(array('topic' => $this->tid), array('field' => 'pid'), $range);
+    module_load_include('inc', 'ppp_data', 'ppp_data.load');
+    return ppp_data_load_posts(array('topic' => $this->tid), array('field' => 'pid'), $range);
   }
 }
 

@@ -11,11 +11,11 @@
  * Display the archive main page
  */
 function ppp_display_page_main() {
-  module_load_include('inc', 'ppp_db', 'ppp_db.load');
-  $categories = ppp_db_load_categories();
+  module_load_include('inc', 'ppp_data', 'ppp_data.load');
+  $categories = ppp_data_load_categories();
   $out = '';
   foreach ($categories as $cid => $name) {
-    $fora = ppp_db_load_fora($cid);
+    $fora = ppp_data_load_fora($cid);
 
     // Run the fora through the access layer
     foreach ($fora as $fid => $forum) {
@@ -23,7 +23,7 @@ function ppp_display_page_main() {
         unset($fora[$fid]);
       }
       else {
-        $fora[$fid]->lastpost = ppp_db_load_lastpost($fid);
+        $fora[$fid]->lastpost = ppp_data_load_lastpost($fid);
       }
     }
     //$cat_head = '<tr class="cat-head"><td colspan="5">' . check_plain($category->name) . '</td></tr>';
@@ -37,8 +37,8 @@ function ppp_display_page_main() {
  * Display one forum
  */
 function ppp_display_page_forum($forum_id) {
-  $forum = ppp_db_load_forum($forum_id);
-  $topics = ppp_db_load_topics(array('forum_id' => $forum_id));
+  $forum = ppp_data_load_forum($forum_id);
+  $topics = ppp_data_load_topics(array('forum_id' => $forum_id));
 
   // TODO: User config.
   $limit = 25;

@@ -1,0 +1,11 @@
+; $Id$
+
+name = Data Layer
+description = The PPP database and object handler.
+core = 8.x
+package = Pied Piper Project
+
+files[] = ppp_data.module
+files[] = ppp_data.load.inc
+files[] = ppp_data.save.inc
+

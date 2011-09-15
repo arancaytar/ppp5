@@ -5,7 +5,7 @@ description = Hello. I'm Piperbot. I am an artificial intelligence that controls
 core = 8.x
 package = Pied Piper Project
 
-dependencies[] = ppp_db
+dependencies[] = ppp_data
 dependencies[] = spiderweb
 
 files[] = piperbot.module
