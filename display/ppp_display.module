@@ -30,7 +30,6 @@ function ppp_display_menu() {
     'title' => 'Archives',
     'description' => 'View all forums',
     'page callback' => 'ppp_display_main',
-    'page arguments' => array(1),
     'access arguments' => array('view archived content'),
     'file' => 'ppp_display.pages.inc',
     'type' => MENU_NORMAL_ITEM,
