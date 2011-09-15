@@ -10,7 +10,7 @@
 /**
  * Display the archive main page
  */
-function ppp_display_main() {
+function ppp_display_page_main() {
   module_load_include('inc', 'ppp_db', 'ppp_db.load');
   $categories = ppp_db_load_categories();
   $out = '';
@@ -36,7 +36,7 @@ function ppp_display_main() {
 /**
  * Display one forum
  */
-function ppp_display_forum($forum_id) {
+function ppp_display_page_forum($forum_id) {
   $forum = ppp_db_load_forum($forum_id);
   $topics = ppp_db_load_topics(array('forum_id' => $forum_id));
 
@@ -97,4 +97,3 @@ function theme_ppp_display_forumlist($fora, $caption) {
 function theme_ppp_display_last_post($lastpost) {
   return t('In <a href="@url">%topic</a> by !user at %time', array('@url' => url('topic/' . $lastpost->tid), '%topic' => $lastpost->title, '!user' => ppp_display_userlink($lastpost->author, $lastpost->ended), '%time' => format_date($lastpost->ended)));
 }
-
