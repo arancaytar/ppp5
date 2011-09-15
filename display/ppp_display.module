@@ -37,6 +37,7 @@ function ppp_display_menu() {
 
   $menu['forum/%ppp_forum'] = array(
     'title callback' => 'ppp_display_title_forum',
+    'title arguments' => array(1),
     'page callback' => 'ppp_display_page_forum',
     'page arguments' => array(1),
     'access callback' => 'ppp_display_access_forum',
@@ -47,6 +48,7 @@ function ppp_display_menu() {
 
   $menu['topic/%ppp_topic'] = array(
     'title callback' => 'ppp_display_title_topic',
+    'title arguments' => array(1),
     'page callback' => 'ppp_display_page_topic',
     'page arguments' => array(1),
     'access callback' => 'ppp_display_access_topic',
