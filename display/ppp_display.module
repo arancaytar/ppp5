@@ -35,11 +35,9 @@ function ppp_display_menu() {
     'type' => MENU_NORMAL_ITEM,
   );
 
-  $menu['forum/%'] = array(
-    // Generic title, replaced by display function
-    'title' => '[Forum]',
-    'description' => 'Display the postlist of one forum',
-    'page callback' => 'ppp_display_forum',
+  $menu['forum/%ppp_forum'] = array(
+    'title callback' => 'ppp_display_title_forum',
+    'page callback' => 'ppp_display_page_forum',
     'page arguments' => array(1),
     'access callback' => 'ppp_display_access_forum',
     'access arguments' => array(1),
@@ -47,13 +45,11 @@ function ppp_display_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $menu['topic/%'] = array(
-    // Generic title, replaced by display function
-    'title' => '[Topic]',
-    'description' => 'Display the postlist of one forum',
-    'page callback' => 'ppp_display_forum',
+  $menu['topic/%ppp_topic'] = array(
+    'title callback' => 'ppp_display_title_topic',
+    'page callback' => 'ppp_display_page_topic',
     'page arguments' => array(1),
-    'access callback' => 'ppp_display_access_forum',
+    'access callback' => 'ppp_display_access_topic',
     'access arguments' => array(1),
     'file' => 'ppp_display.pages.inc',
     'type' => MENU_CALLBACK,
