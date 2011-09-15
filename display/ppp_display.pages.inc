@@ -8,26 +8,6 @@
  */
 
 /**
- * Determine whether the current user may view a certain forum or topic
- *
- * @param $forum
- *   The number of the forum that is being requested, or the forum the topic is in.
- *
- * @return
- *   A user access boolean.
- */
-function ppp_display_access_forum($forum) {
-  $mod_boards = variable_get('ppp_classified_fora', array());
-
-  if (!empty($mod_boards[$forum])) {
-    return user_access('view classified content');
-  }
-  else {
-    return user_access('view archived content');
-  }
-}
-
-/**
  * Display the archive main page
  */
 function ppp_display_main() {
