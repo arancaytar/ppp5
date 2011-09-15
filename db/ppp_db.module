@@ -1,3 +1,87 @@
 <?php
 // $Id$
 
+/**
+ * @file ppp_db.module
+ * Data object classes that allow dynamically loading associated information.
+ */
+
+/**
+ * Generic data object wrapper. This stores a passed object
+ * and passes any property getting and setting through to that object.
+ * Additional methods may then be defined by extending classes.
+ * @TODO Determine whether it is possible to simply typecast the object instead of wrapping it.
+ */
+class PPPDataObject {
+  function __construct($data) {
+    $this->data = $data;
+  }
+
+  function __get($attr) {
+    return $this->data->$attr;
+  }
+
+  function __set($attr, $value) {
+    return $this->data->$attr = $value;
+  }
+
+  function __tostring() {
+    return print_r($this->data, TRUE)
+  }
+}
+
+/**
+ * Wrapper for the forum data object.
+ * This object allows loading additional data related to this forum.
+ */
+class PPPForum extends PPPDataObject {
+  function __construct($data) {
+    parent::__construct($data);
+  }
+
+  function __tostring() {
+    return "Forum <" . parent::__tostring() . ">";
+  }
+}
+
+/**
+ * Wrapper for the topic data object.
+ * This object allows loading additional data related to this topic.
+ */
+class PPPTopic extends PPPDataObject {
+  function __construct($data) {
+    parent::__construct($data);
+  }
+
+  function __tostring() {
+    return "Topic <" . parent::__tostring() . ">";
+  }
+}
+
+/**
+ * Wrapper for the forum data object.
+ * This object allows loading additional data related to this post.
+ */
+class PPPPost extends PPPDataObject {
+  function __construct($data) {
+    parent::__construct($data);
+  }
+
+  function __tostring() {
+    return "Post <" . parent::__tostring() . ">";
+  }
+}
+
+/**
+ * Wrapper for the user data object.
+ * This object allows loading additional data related to this user.
+ */
+class PPPUser extends PPPDataObject {
+  function __construct($data) {
+    parent::__construct($data);
+  }
+
+  function __tostring() {
+    return "User <" . parent::__tostring() . ">";
+  }
+}
