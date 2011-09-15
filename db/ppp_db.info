@@ -1,4 +1,4 @@
-; $Id: ppp_db.info 507 2011-09-13 14:23:38Z arancaytar $
+; $Id$
 
 name = Database Layer
 description = Schema and interface for the PPP5 database.

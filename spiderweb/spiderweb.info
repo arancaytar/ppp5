@@ -1,4 +1,4 @@
-; $Id: spiderweb.info 507 2011-09-13 14:23:38Z arancaytar $
+; $Id$
 
 name = Spiderweb Link
 description = Fetches content from the Spiderweb UBB Forums.

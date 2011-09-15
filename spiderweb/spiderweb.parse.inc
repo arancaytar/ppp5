@@ -1,5 +1,5 @@
 <?php
-// $Id: spiderweb.parse.inc 478 2010-08-16 11:58:31Z arancaytar $
+// $Id$
 
 
 /**

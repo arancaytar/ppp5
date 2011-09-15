@@ -1,4 +1,4 @@
-; $Id: ppp_display.info 507 2011-09-13 14:23:38Z arancaytar $
+; $Id$
 
 name = Web Display
 description = Display the PPP archives on the web.

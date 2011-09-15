@@ -1,5 +1,5 @@
 <?php
-// $Id: ppp_display.pages.inc 483 2010-08-16 22:48:02Z arancaytar $
+// $Id$
 
 
 /**
