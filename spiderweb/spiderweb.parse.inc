@@ -56,6 +56,7 @@ function spiderweb_parse_main_page($data) {
     }
   }
 
+  $html->clear();
   return $main;
 }
 
@@ -113,6 +114,7 @@ function spiderweb_parse_forum($data) {
     }
     $forum->topics[$t->post] = $t;
   }
+  $html->clear();
   return $forum;
 }
 
@@ -176,6 +178,7 @@ function spiderweb_parse_topic($data) {
   $topic->author  = $topic->posts[0]->author;
   $topic->icon    = $topic->posts[0]->icon;
 
+  $html->clear();
   return $topic;
 }
 
@@ -229,6 +232,10 @@ function spiderweb_parse_bbcode_reverse($dom) {
   module_load_include('inc', 'spiderweb', 'spiderweb.html');
   if (!is_object($dom)) {
     $dom = spiderweb_html_parse($dom);
+    $clear = TRUE;
+  }
+  else {
+    $clear = FALSE;
   }
   $result = $dom->innertext;
 
@@ -289,6 +296,9 @@ function spiderweb_parse_bbcode_reverse($dom) {
 
   $result = str_replace('<br />', "\n", $result);
   $result = html_entity_decode($result);
+  if ($clear) {
+    $dom->clear();
+  }
   return $result;
 }
 
