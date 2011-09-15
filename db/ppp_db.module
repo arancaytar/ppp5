@@ -13,6 +13,7 @@
  * @TODO Determine whether it is possible to simply typecast the object instead of wrapping it.
  */
 class PPPDataObject {
+  public $data;
   function __construct($data) {
     $this->data = $data;
   }
@@ -26,7 +27,7 @@ class PPPDataObject {
   }
 
   function __tostring() {
-    return print_r($this->data, TRUE)
+    return print_r($this->data, TRUE);
   }
 }
 
@@ -40,7 +41,12 @@ class PPPForum extends PPPDataObject {
   }
 
   function __tostring() {
-    return "Forum <" . parent::__tostring() . ">";
+    return 'Forum <' . parent::__tostring() . '>';
+  }
+
+  function load_topics($sort, $range) {
+    module_load_include('inc', 'ppp_db', 'ppp_db.load');
+    return ppp_db_load_posts(array('forum' => $this->fid), $sort, $range);
   }
 }
 
@@ -54,7 +60,12 @@ class PPPTopic extends PPPDataObject {
   }
 
   function __tostring() {
-    return "Topic <" . parent::__tostring() . ">";
+    return 'Topic <' . parent::__tostring() . '>';
+  }
+
+  function load_posts($range) {
+    module_load_include('inc', 'ppp_db', 'ppp_db.load');
+    return ppp_db_load_posts(array('topic' => $this->tid), array('field' => 'pid'), $range);
   }
 }
 

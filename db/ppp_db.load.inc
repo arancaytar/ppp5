@@ -99,7 +99,7 @@ function ppp_db_load_post($pid) {
  *   A topic object.
  */
 function ppp_db_load_topic($tid) {
-  return db_query('SELECT * FROM {ppp_topic} WHERE tid = :tid', array(':tid' => (int)$tid))->fetch();
+  return new PPPTopic(db_query('SELECT * FROM {ppp_topic} WHERE tid = :tid', array(':tid' => (int)$tid))->fetch());
 }
 
 /**
