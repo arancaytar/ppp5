@@ -19,13 +19,14 @@ define('TIME_OFFSET', 9 * 3600);
  *   object { array $categories [ int $id => object $category { int $cid, string $name } ], array $fora [ int $id => object $forum ] }
  */
 function spiderweb_parse_main_page($data) {
-  module_load_include('inc', 'spiderweb', 'spiderweb.parse');
+  module_load_include('inc', 'spiderweb', 'spiderweb.html');
   $main = new stdClass();
   // Yes. Fora.
   $main->fora = array();
   $main->categories = array();
 
   $html = spiderweb_html_parse($data);
+
   foreach ($html->find('thead') as $cat) {
     $link = $cat->find('a', 0);
     $id = trim(strrchr($link->href, '='), '=');
@@ -398,3 +399,49 @@ function spiderweb_parse_smiley_reverse($image) {
   return isset($smileys[$image]) ? $smileys[$image] : FALSE;
 }
 
+function spiderweb_parse_user($data) {
+  $user = (object) array();
+  $user->fields = array();
+
+  preg_match('%<b>Member #:</b>.*?&nbsp;  ([0-9]+) &nbsp;%s', $data, $match);
+  $user->uid = $match[1];
+
+  preg_match('%<title>Profile for (.*?) - Spiderweb Software Forum</title>%', $data, $match);
+  $user->fields['displayed_name'] = $match[1];
+
+  preg_match('%<span class="date">(.*?)</span>%', $data, $match);
+  $user->joined = strtotime($match[1]) - TIME_OFFSET;
+
+  preg_match('%<b>Total Posts:</b>.*?&nbsp;  ([0-9]+) &nbsp;%s', $data, $match);
+  $user->posts = (int) $match[1];
+
+  preg_match('%<b>Title:</b>.*?&nbsp;  ([^\r\n]+) &nbsp;%s', $data, $match);
+  $user->fields['title'] = $match[1];
+
+  if (preg_match('/<a href="mailto:(.*?)">/', $data, $match)) {
+    $user->fields['email'] = $match[1];
+  }
+
+  if (preg_match('/<a href="(.*?)" target="new">/', $data, $match)) {
+    $user->fields['url'] = $match[1];
+  }
+
+  $fields = array(
+    'im_icq' => 'IM (ICQ)',
+    'im_yahoo' => 'IM (YAHOO)',
+    'im_msn' => 'IM (MSN)',
+    'im_aim' => 'IM (AIM)',
+    'occupation' => 'Occupation',
+    'hobbies' => 'Hobbies',
+    'location' => 'Location',
+    'real_name' => 'Real Name',
+    'fav_game' => 'Favorite Spiderweb Game',
+  );
+
+  foreach ($fields as $name => $title) {
+    if (preg_match('%<td valign="top">.*?' . $title . ':\s*?</td>\s*?<td valign="top">.*?&nbsp;.*?([^\s]([^\r\n]*?[^\s])?)\s*?</td>%s', $data, $match)) {
+      $user->fields[$name] = check_plain($match[1]);
+    }
+  }
+  return $user;
+}
