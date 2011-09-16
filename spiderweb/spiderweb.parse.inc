@@ -70,7 +70,7 @@ function spiderweb_parse_main_page($data) {
  *   An array of topics [ int $post => object $topic { int $post, string $title, int $author, int $length, int $updated }].
  */
 function spiderweb_parse_forum($data) {
-  module_load_include('inc', 'spiderweb', 'spiderweb.parse');
+  module_load_include('inc', 'spiderweb', 'spiderweb.html');
   $html = spiderweb_html_parse($data);
 
   $forum         = new stdClass();
@@ -129,43 +129,42 @@ function spiderweb_parse_forum($data) {
  */
 function spiderweb_parse_topic($data) {
   module_load_include('inc', 'spiderweb', 'spiderweb.html');
-  $html = spiderweb_html_parse($data);
-
   $topic = (object)array();
 
-  foreach ($html->find('#options_popup a') as $link) {
-    if (preg_match('/ubb=printthread.*Board=([0-9]+).*main=([0-9]+)/', $link->href, $match)) {
-      $topic->forum = $match[1];
-      $topic->tid = $match[2];
-    }
+  if (preg_match('/ubb=printthread.*Board=([0-9]+).*main=([0-9]+)/', $data, $match)) {
+    $topic->forum = $match[1];
+    $topic->tid = $match[2];
+  }
+  else {
+    return FALSE;
   }
 
-  if ($html->find('td.subjecttable img[source=/forum/images/general/default/lock.gif]', 0)) {
-    $topic->closed = TRUE;
-  }
-  else $topic->closed = FALSE;
+  $topic->closed = strpos($data, '<img src="/forum/images/general/default/lock.gif" alt="" />') > 0;
 
-  if (preg_match('/sticky=1/', $html->find('div#prev-next-links a', 0)->href)) {
+  if (preg_match('/<div id="prev-next-links">.*sticky=1/', $data)) {
     $topic->sticky = TRUE;
   }
   else $topic->sticky = FALSE;
 
-  // Yes, we calculate the string length of a constant here. You will thank me when you next need to maintain this, Aran.
-  $topic->title = substr($html->find('title', 0)->innertext, 0, -1 * strlen(' - Spiderweb Software Forum'));
+  if (preg_match('%<title>(.*) - Spiderweb Software Forum</title>%', $data, $match)) {
+    $topic->title = $match[1];
+  }
+  else {
+    return FALSE;
+  }
 
   // We have now parsed all the five "normal" topic properties. The other six are aggregated from post content, which is now parsed.
 
   $topic->posts = array();
-
-  foreach ($html->find('table.t_outer > tr > td > table.t_inner > tr > td > table') as $post_data) {
+  preg_match_all('$<table width="100%" cellspacing="0" cellpadding="0">(?<post>.*?)</table>$s', $data, $posts);
+  foreach ($posts['post'] as $post_data) {
     $post = spiderweb_parse_post($post_data);
     if ($post) {
       // Denormalize these IDs downwards:
       $post->topic = $topic->tid;
       $post->forum = $topic->forum;
-
-      preg_match('/User=([0-9]+)/', $html->find("#profile_popup_{$post->pid} a", 0)->href, $match);
-      $post->author = $match[1];
+      preg_match('%<div id="profile_popup_' . $post->pid . '".*?&amp;User=(?P<author>[0-9]+)"%s', $data, $author);
+      $post->author = $author['author'];
 
       $topic->posts[] = $post;
     }
@@ -178,7 +177,6 @@ function spiderweb_parse_topic($data) {
   $topic->author  = $topic->posts[0]->author;
   $topic->icon    = $topic->posts[0]->icon;
 
-  $html->clear();
   return $topic;
 }
 
@@ -193,31 +191,39 @@ function spiderweb_parse_topic($data) {
  *   Author is NOT included as that information is outside the post markup and must be added by the caller.
  */
 function spiderweb_parse_post($data) {
-  $meta = $data->find('td.subjecttable span span');
-  if (count($meta) < 2) return FALSE;
-
-  $post          = new stdclass();
-  $post->pid     = trim($meta[0]->innertext, '#');
-
-  // Relative timestamps consist of two spans, and the "at" breaks strtotime.
-  $date = $meta[1]->innertext;
-  if (count($meta) > 2) {
-    $date = str_replace('at', '', $date) . $meta[2]->innertext;
+  $post = (object) array();
+  if (preg_match('%<span id="number(?P<pid>[0-9]+)">.*<span class="date">(?<date>.*?)(?:at)?</span>(?: <span class="time">(?P<time>.*?)</span>)?%', $data, $meta)) {
+    $post->pid = $meta['pid'];
+    $date = $meta['date'];
+    // Relative timestamps consist of two spans, and the "at" breaks strtotime.
+    if (!empty($meta['time'])) {
+      $date .= $meta['time'];
+    }
+    $post->created = strtotime($date);
   }
-  $post->created = strtotime($date) - TIME_OFFSET;
+  else {
+    return FALSE;
+  }
 
-  $img = $data->find('td.subjecttable a img', 0);
-  $post->icon = isset($img->src) ? spiderweb_parse_icon_reverse(basename($img->src)) : 0;
+  if (preg_match('%(?<body><div id="body[0-9]+">.*</div>)%s', $data, $body)) {
+    $post->body = spiderweb_parse_bbcode_reverse($body['body']);
+  }
+  else {
+    return FALSE;
+  }
 
-  if ($ip = $data->find('td.author-content span.small i', 0)) {
-    preg_match('/\(([0-9\.]+)\)/', $ip->innertext, $match);
-    $post->ip = $match[1];
+  if (preg_match('%<img src="/forum/images/icons/default/(?<icon>.*?)" alt="" />%', $data, $icon)) {
+    $post->icon = spiderweb_parse_icon_reverse($icon['icon']);
+  }
+  else {
+    $post->icon = 0;
+  }
+
+  if ($ip = preg_match('%<i>\(?P<ip>((?:[0-9]{1,3}\.){3,3}\.[0-9])\)</i>%', $data, $ip)) {
+    $post->ip = $ip['ip'];
   }
   else $post->ip = '';
 
-  $post->body = spiderweb_parse_bbcode_reverse($data->find('div.post_inner div', 0));
-
-  // Obviously, since topic and author are denormalized downward, they must be added by the caller.
   return $post;
 }
 
@@ -242,41 +248,54 @@ function spiderweb_parse_bbcode_reverse($dom) {
   foreach ($dom->find('div.ubbcode-block') as $q) {
     $body = $q->find('div.ubbcode-body', 0);
     if (isset($body->children[0]) && $body->children[0]->tag == 'pre') {
-      $code = "[code]{$body->children[0]->innertext}[/code]";
-      $result = str_replace($q->outertext, $code, $result);
+      $tag = "[code]{$body->children[0]->innertext}[/code]";
+    }
+    elseif (isset($body->children[0]) && $body->children[0]->style == 'display: none;') {
+      $tag = "[spoiler]{$body->children[0]->innertext}[/spoiler]";
     }
     else {
       $author = trim(strchr($q->find('div.ubbcode-header', 0)->innertext, ':'), ': ');
-      $quote  = $author ? "[quote={$author}]{$body->innertext}[/quote]" : "[quote]{$body->innertext}[/quote]";
-      $result = str_replace($q->outertext, $quote, $result);
+      $tag  = $author ? "[quote={$author}]{$body->innertext}[/quote]" : "[quote]{$body->innertext}[/quote]";
     }
+    $result = str_replace($q->outertext, $tag, $result);
   }
 
   // Reparse now that the quotes are removed.
+  if ($clear) $dom->clear();
   $dom = spiderweb_html_parse($result);
+  $result = $dom->find('div', 0)->innertext;
 
-  foreach ($dom->find('span') as $span) {
-    list($property, $value) = explode(': ', $span->style, 2);
-    $content = $span->innertext;
-    if ($property == 'font-size') {
-      $tag = "[size={$value}]{$content}[/size]";
+  foreach ($dom->find('span[style]') as $span) {
+    if (strpos($span->style, ': ') > 0) {
+      list($property, $value) = explode(': ', $span->style, 2);
+      $content = $span->innertext;
+      if ($property == 'font-size') {
+        $tag = "[size={$value}]{$content}[/size]";
+      }
+      elseif ($value == 'line-through') {
+        $tag = "[s]{$content}[/s]";
+      }
+      elseif ($value == 'underline') {
+        $tag = "[u]{$content}[/u]";
+      }
+      elseif ($value == 'bold') {
+        $tag = "[b]{$content}[/b]";
+      }
+      elseif ($value == 'italic') {
+        $tag = "[i]{$content}[/i]";
+      }
+      elseif ($property == 'color') {
+        $tag = "[color={$value}]{$content}[/color]";
+      }
+      elseif ($property == 'font-family') {
+        $tag = "[font={$value}]{$content}[/font]";
+      }
+      else {
+        $span->dump();
+        var_dump($property, $value, $content);
+      }
+      $result = str_replace($span->outertext, $tag, $result);
     }
-    elseif ($value == 'line-through') {
-      $tag = "[s]{$content}[/s]";
-    }
-    elseif ($value == 'underline') {
-      $tag = "[u]{$content}[/u]";
-    }
-    elseif ($value == 'bold') {
-      $tag = "[b]{$content}[/b]";
-    }
-    elseif ($value == 'italic') {
-      $tag = "[i]{$content}[/i]";
-    }
-    elseif ($property == 'color') {
-      $tag = "[color={$value}]{$content}[/color]";
-    }
-    $result = str_replace($span->outertext, $tag, $result);
   }
 
   foreach ($dom->find('a') as $a) {
