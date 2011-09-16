@@ -173,7 +173,7 @@ function ppp_data_save_user($user) {
       'joined' => (int)$user->joined,
       'posts' => (int)$user->posts,
       // Ensure valid pseudo-enum.
-      'notes' => isset($user->notes) ? "$user->notes" : NULL,
+      'notes' => isset($user->notes) ? "{$user->notes}" : NULL,
       'updated' => (int)$user->updated,
     ))->execute();
 }

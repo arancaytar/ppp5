@@ -55,7 +55,7 @@ function ppp_data_load_user($uid, $time = NULL) {
 
   while ($field = $fields->fetch()) {
     // How often can I say field on one line?
-    $user->fields[$field->fid] = $field;
+    $user->fields[$field->name] = $field;
   }
 
   return $user;
