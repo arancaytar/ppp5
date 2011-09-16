@@ -646,10 +646,6 @@ class spiderweb_html_node {
       if ($m[0] === '' || $m[0] === '/' || $m[0] === '//') {
         continue;
       }
-      // for browser generated xpath
-      if ($m[1] === 'tbody') {
-        continue;
-      }
 
       list($tag, $key, $val, $exp, $no_key) = array($m[1], NULL, NULL, '=', FALSE);
       if (!empty($m[2])) {
