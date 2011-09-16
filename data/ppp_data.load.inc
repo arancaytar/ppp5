@@ -156,10 +156,8 @@ function ppp_data_load_fora($category = NULL) {
   }
 
   foreach ($fora as $fid => $forum) {
-    if (isset($stats[$fid])) {
-      $fora[$fid]->posts = $stats[$fid]->posts;
-      $fora[$fid]->topics = $stats[$fid]->topics;
-    }
+    $fora[$fid]->posts = isset($stats[$fid]) ? $stats[$fid]->posts : 0;
+    $fora[$fid]->topics = isset($stats[$fid]) ? $stats[$fid]->topics : 0;
   }
 
   return $fora;
@@ -174,12 +172,13 @@ function ppp_data_load_lastpost($forum) {
   $query->addField('t', 'title');
   $query->addField('t', 'ended');
 
-  $query->join('post', 'p', 't.tid = p.topic');
+  $query->join('ppp_post', 'p', 't.tid = p.topic');
 
   $query->addField('p', 'author');
+  $query->condition('t.forum', $forum);
   $query->orderBy('t.ended', 'desc');
   $query->range(0, 1);
-  return $query->execute->fetch();
+  return $query->execute()->fetch();
 }
 
 /**
