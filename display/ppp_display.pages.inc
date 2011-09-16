@@ -13,24 +13,42 @@
 function ppp_display_page_main() {
   module_load_include('inc', 'ppp_data', 'ppp_data.load');
   $categories = ppp_data_load_categories();
-  $out = '';
+  $page = array();
+  $header = array(
+    'id' => t('#'),
+    'forum' => t('Forum'),
+    'topics' => t('Topics'),
+    'posts' => t('Posts'),
+    'last' => t('Last activity'),
+  );
   foreach ($categories as $cid => $name) {
+    $page[$cid] = array(
+      '#theme' => 'table',
+      '#caption' => $name,
+      '#header' => $header,
+      '#rows' => array(),
+    );
+
     $fora = ppp_data_load_fora($cid);
 
-    // Run the fora through the access layer
     foreach ($fora as $fid => $forum) {
+      // Run the fora through the access layer
       if (!ppp_display_access_forum($fid)) {
         unset($fora[$fid]);
+        continue;
       }
-      else {
-        $fora[$fid]->lastpost = ppp_data_load_lastpost($fid);
-      }
+      $last = ppp_data_load_lastpost($fid);
+
+      $page[$cid]['#rows'][$fid] = array(
+        'id' => $fid,
+        'name' => theme('ppp_display_forum_name', array('forum' => $forum)),
+        'topics' => $forum->topics,
+        'posts' => $forum->posts,
+        'last' => $last ? theme('ppp_display_forum_last', array('post' => $last)) : t('<span style="white-space:nowrap">No content</span>'),
+      );
     }
-    //$cat_head = '<tr class="cat-head"><td colspan="5">' . check_plain($category->name) . '</td></tr>';
-    $out .= theme('ppp_display_forumlist', $fora, check_plain($name));
-    //$out .= str_replace('<thead>', "<thead>$cat_head", $fora);
   }
-  return $out;
+  return $page;
 }
 
 /**
@@ -56,44 +74,19 @@ function ppp_display_page_forum($forum_id) {
   return $out;
 }
 
-/**
- * Render a list of fora.
- */
-function theme_ppp_display_forumlist($fora, $caption) {
-  $attributes = array('class' => 'forum-list');
-
-  // This is not sortable.
-  $header = array(
-    '#',
-    'Forum',
-    'Topics',
-    'Posts',
-    'Last post',
+function theme_ppp_display_forum_name($variables) {
+  $forum = $variables['forum'];
+  $link['attributes'] = array(
+    'class' => 'forum-link',
+    'id' => "forum-link-{$forum->fid}",
   );
-
-  $data = array();
-
-  foreach ($fora as $id => $forum) {
-    $link['attributes'] = array(
-      'class' => 'forum-link',
-      'id' => "forum-link-$id",
-    );
-    $themed_name = l($forum->name, "forum/$id", $link) . '<p class="forum-desc">' . check_plain($forum->description) . '</p>';
-    $data[] = array(
-      $id,
-      $themed_name,
-      $forum->topics,
-      $forum->posts,
-      theme('ppp_display_last_post', $forum->lastpost),
-    );
-  }
-
-  return theme('table', $header, $data, $attributes, $caption);
+  return l($forum->name, "forum/{$forum->fid}", $link) . '<p class="forum-desc">' . check_plain($forum->description) . '</p>';
 }
 
 /**
  * Render the last post field.
  */
-function theme_ppp_display_last_post($lastpost) {
-  return t('In <a href="@url">%topic</a> by !user at %time', array('@url' => url('topic/' . $lastpost->tid), '%topic' => $lastpost->title, '!user' => ppp_display_userlink($lastpost->author, $lastpost->ended), '%time' => format_date($lastpost->ended)));
+function theme_ppp_display_forum_last($variables) {
+  $post = $variables['post'];
+  return t('<span style="white-space: nowrap">In <a href="@url">%topic</a></span> <span style="white-space: nowrap">by !user</span> <span style="white-space: nowrap"> at %time</p>', array('@url' => url('topic/' . $post->tid), '%topic' => $post->title, '!user' => ppp_display_userlink($post->author, $post->ended), '%time' => format_date($post->ended)));
 }

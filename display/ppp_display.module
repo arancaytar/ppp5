@@ -29,13 +29,13 @@ function ppp_display_menu() {
   $menu['archives'] = array(
     'title' => 'Archives',
     'description' => 'View all forums',
-    'page callback' => 'ppp_display_main',
+    'page callback' => 'ppp_display_page_main',
     'access arguments' => array('view archived content'),
     'file' => 'ppp_display.pages.inc',
     'type' => MENU_NORMAL_ITEM,
   );
 
-  $menu['forum/%ppp_forum'] = array(
+  $menu['forum/%ppp_data_forum'] = array(
     'title callback' => 'ppp_display_title_forum',
     'title arguments' => array(1),
     'page callback' => 'ppp_display_page_forum',
@@ -46,7 +46,7 @@ function ppp_display_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $menu['topic/%ppp_topic'] = array(
+  $menu['topic/%ppp_data_topic'] = array(
     'title callback' => 'ppp_display_title_topic',
     'title arguments' => array(1),
     'page callback' => 'ppp_display_page_topic',
@@ -64,24 +64,18 @@ function ppp_display_menu() {
  * Implementation of hook_perm()
  */
 function ppp_display_perm() {
-  $perm['view archived content'] = t('View any public forum, topic or post in the archives.');
-
-  /*
-   * This permission must not be given to anyone who is not a moderator on Spiderweb
-   * or Stareye will do something very nasty to me.
-   */
-
-  $perm['view classified content'] = t('View content that is not public on the original forum.');
-
-  return $perm;
+  return array(
+    'view archived content' => t('View any public forum, topic or post in the archives.'),
+    'view classified content' => t('View content that is not public on the original forum.'),
+  );
 }
 
 /**
  * Implementation of hook_theme()
  */
 function ppp_display_theme() {
-  $theme['ppp_display_forumlist'] = array(
-    'arguments' => array('fora' => NULL, 'caption' => NULL),
+  $theme['ppp_display_forum_name'] = array(
+    'arguments' => array('forum' => NULL),
   );
   $theme['ppp_display_topiclist'] = array(
     'arguments' => array('topics' => NULL, 'forum' => NULL),
@@ -89,8 +83,8 @@ function ppp_display_theme() {
   $theme['ppp_display_postlist'] = array(
     'arguments' => array('posts' => NULL, 'topic' => NULL, 'forum' => NULL),
   );
-  $theme['ppp_display_lastpost'] = array(
-    'arguments' => array('lastpost' => NULL),
+  $theme['ppp_display_forum_last'] = array(
+    'arguments' => array('post' => NULL),
   );
   return $theme;
 }
@@ -115,3 +109,8 @@ function ppp_display_access_forum($forum) {
   }
 }
 
+function ppp_display_userlink($uid, $date = NULL) {
+  module_load_include('inc', 'ppp_data', 'ppp_data.load');
+  $user = ppp_data_load_user($uid, $date);
+  return l($user->fields['displayed_name'], "user/$uid");
+}
