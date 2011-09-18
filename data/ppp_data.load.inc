@@ -176,7 +176,7 @@ function ppp_data_load_lastpost($forum) {
 
   $query->addField('p', 'author');
   $query->condition('t.forum', $forum);
-  $query->orderBy('t.ended', 'desc');
+  $query->orderBy('p.created', 'desc');
   $query->range(0, 1);
   return $query->execute()->fetch();
 }
