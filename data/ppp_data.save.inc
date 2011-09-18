@@ -120,14 +120,18 @@ function ppp_data_save_category($category) {
  *    - string notes,
  */
 function ppp_data_save_user($user) {
-  module_load_include('inc', 'ppp_data', 'ppp_data.save');
+  module_load_include('inc', 'ppp_data', 'ppp_data.load');
   $old_user = ppp_data_load_user($user->uid);
   $fields = ppp_data_load_fields();
+  $added = array();
+
+  if (!isset($user->updated)) {
+    $user->updated = REQUEST_TIME;
+  }
 
   // If a user is already here, use a lot of intricate logic to update fields.
   if ($old_user) {
     $expired = array();
-    $added = array();
 
     // Find values that have been deleted, added or changed.
     foreach ($fields as $fid => $name) {
@@ -145,26 +149,26 @@ function ppp_data_save_user($user) {
     }
 
     // Add an expiration timestamp to old fields.
-    db_update('ppp_user_profile')->fields(array('expired' => $user->updated))->condition('aid', $expired, 'IN')->execute();
+    db_update('ppp_user_profile')->fields(array('expired' => (int) $user->updated))->condition('aid', $expired, 'IN')->execute();
   }
   else {
     // Since the user does not exist yet, all fields are considered new, and no fields are expired.
-    foreach ($fields as $fid => $name) {
-      if (isset($user->fields[$name])) {
-        $added[$fid] = $user->fields[$value];
+    foreach ($fields as $fid => $field) {
+      if (isset($user->fields[$field->name])) {
+        $added[$fid] = $user->fields[$field->name];
       }
     }
   }
 
   // Insert new fields, whether the user exists or not.
-  $query = db_insert('ppp_user_profile');
+  $query = db_insert('ppp_user_profile')->fields(array('uid', 'field', 'value', 'created'));
   foreach ($added as $fid => $value) {
     $query->values(array(
-        'uid' => (int)$user->uid,
-        'fid' => (int)$fid,
-        'value' => "$value",
-        'created' => (int)$user->updated,
-      ));
+      'uid' => (int) $user->uid,
+      'field' => (int) $fid,
+      'value' => "{$value}",
+      'created' => (int) $user->updated,
+    ));
   }
   $query->execute();
 

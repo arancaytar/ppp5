@@ -42,7 +42,7 @@ function ppp_data_load_user($uid, $time = NULL) {
     $time = (int)$time;
     $query->condition('created', $time, '<');
 
-    $lost = db_or()->condition('expired', $time, '>')->condition('`expired` IS NULL', array(), NULL);
+    $lost = db_or()->condition('expired', $time, '>')->condition('expired', NULL, 'IS NULL');
 
     $query->condition($lost);
   }
