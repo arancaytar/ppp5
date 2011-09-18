@@ -427,10 +427,10 @@ function spiderweb_parse_user($data) {
   }
 
   $fields = array(
-    'im_icq' => 'IM (ICQ)',
-    'im_yahoo' => 'IM (YAHOO)',
-    'im_msn' => 'IM (MSN)',
-    'im_aim' => 'IM (AIM)',
+    'im_icq' => 'IM \(ICQ\)',
+    'im_yahoo' => 'IM \(YAHOO\)',
+    'im_msn' => 'IM \(MSN\)',
+    'im_aim' => 'IM \(AIM\)',
     'occupation' => 'Occupation',
     'hobbies' => 'Hobbies',
     'location' => 'Location',
