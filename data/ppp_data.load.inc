@@ -35,27 +35,28 @@ function ppp_data_load_user($uid, $time = NULL) {
   $query->addField('p', 'value');
   $query->addField('p', 'created');
   $query->addField('p', 'expired');
+  $query->addExpression('`expired` IS NULL', 'current');
 
   $query->condition('uid', $uid);
 
   if ($time) {
     $time = (int)$time;
-    $query->condition('created', $time, '<');
-
-    $lost = db_or()->condition('expired', $time, '>')->condition('expired', NULL, 'IS NULL');
-
-    $query->condition($lost);
+    $old = db_and()->condition('created', $time, '<')->condition('expired', $time, '>');
+    $old_or_new = db_or()->condition($old)->condition('expired', NULL, 'IS NULL');
+    $query->condition($old_or_new);
   }
   else {
-    $query - condition('`expired` IS NULL', array(), NULL);
+    $query - condition('expired', NULL, 'IS NULL');
   }
-
-  $user->fields = array();
+  $query->orderBy('current')->orderBy('created', 'DESC');
   $fields = $query->execute();
 
+  $user->fields = array();
   while ($field = $fields->fetch()) {
-    // How often can I say field on one line?
-    $user->fields[$field->name] = $field;
+    if (!isset($user->fields[$field->name])) {
+      // How often can I say field on one line?
+      $user->fields[$field->name] = $field;
+    }
   }
 
   return $user;
