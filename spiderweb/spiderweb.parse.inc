@@ -403,8 +403,12 @@ function spiderweb_parse_user($data) {
   $user = (object) array();
   $user->fields = array();
 
-  preg_match('%<b>Member #:</b>.*?&nbsp;  ([0-9]+) &nbsp;%s', $data, $match);
-  $user->uid = $match[1];
+  if (preg_match('%<b>Member #:</b>.*?&nbsp;  ([0-9]+) &nbsp;%s', $data, $match)) {
+    $user->uid = $match[1];
+  }
+  else {
+    return FALSE;
+  }
 
   preg_match('%<title>Profile for (.*?) - Spiderweb Software Forum</title>%', $data, $match);
   $user->fields['displayed_name'] = $match[1];
@@ -418,7 +422,7 @@ function spiderweb_parse_user($data) {
   preg_match('%<b>Title:</b>.*?&nbsp;  ([^\r\n]+) &nbsp;%s', $data, $match);
   $user->fields['title'] = $match[1];
 
-  if (preg_match('/<a href="mailto:(.*?)">/', $data, $match)) {
+  if (preg_match('/<a href="mailto:(.+?)">\1<\/a>/', $data, $match)) {
     $user->fields['email'] = $match[1];
   }
 
@@ -439,7 +443,7 @@ function spiderweb_parse_user($data) {
   );
 
   foreach ($fields as $name => $title) {
-    if (preg_match('%<td valign="top">.*?' . $title . ':\s*?</td>\s*?<td valign="top">.*?&nbsp;.*?([^\s]([^\r\n]*?[^\s])?)\s*?</td>%s', $data, $match)) {
+    if (preg_match('%<td valign="top">.*?' . $title . ':\s*?</td>\s*?<td valign="top">\s*?&nbsp;\s*?([^\s]([^\r\n]*?[^\s])?)\s*?</td>%s', $data, $match)) {
       $user->fields[$name] = check_plain($match[1]);
     }
   }
