@@ -46,7 +46,7 @@ function ppp_data_load_user($uid, $time = NULL) {
     $query->condition($old_or_new);
   }
   else {
-    $query - condition('expired', NULL, 'IS NULL');
+    $query->condition('expired', NULL, 'IS NULL');
   }
   $query->orderBy('current')->orderBy('created', 'DESC');
   $fields = $query->execute();
@@ -113,7 +113,7 @@ function ppp_data_topic_load($tid) {
  *   A forum object
  */
 function ppp_data_forum_load($fid) {
-  return db_query('SELECT * FROM {ppp_forum} WHERE fid = :fid', array(':fid' => (int)$fid))->fetch();
+  return new PPPForum(db_query('SELECT * FROM {ppp_forum} WHERE fid = :fid', array(':fid' => (int)$fid))->fetch());
 }
 
 /**
@@ -255,8 +255,9 @@ function ppp_data_load_posts($condition, $sort = array(), $range = array()) {
  * @return
  *   An array of [ int pid : object post ]
  */
-function ppp_data_load_topics($condition, $sort = array(), $range = array()) {
-  $query = db_select('ppp_topic', 't');
+function ppp_data_load_topics($condition, $header = NULL, $limit = 25) {
+  $query = db_select('ppp_topic', 't')->extend('PagerDefault')->extend('TableSort');
+  $query->limit($limit);
   $query->addField('t', 'tid');
   $query->addField('t', 'post');
   $query->addField('t', 'forum');
@@ -272,11 +273,8 @@ function ppp_data_load_topics($condition, $sort = array(), $range = array()) {
   foreach ($condition as $field => $value) {
     $query->condition($field, $value);
   }
-  if ($sort) {
-    $query->orderBy($sort['field'], $sort['direction']);
-  }
-  if ($range) {
-    $query->range((int)$range['start'], (int)$range['count']);
+  if ($header) {
+    $query->orderByHeader($header);
   }
   $result = $query->execute();
 

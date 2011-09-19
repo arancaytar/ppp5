@@ -33,7 +33,7 @@ function ppp_display_page_main() {
 
     foreach ($fora as $fid => $forum) {
       // Run the fora through the access layer
-      if (!ppp_display_access_forum($fid)) {
+      if (!ppp_display_access_forum($forum)) {
         unset($fora[$fid]);
         continue;
       }
@@ -54,24 +54,63 @@ function ppp_display_page_main() {
 /**
  * Display one forum
  */
-function ppp_display_page_forum($forum_id) {
-  $forum = ppp_data_load_forum($forum_id);
-  $topics = ppp_data_load_topics(array('forum_id' => $forum_id));
-
+function ppp_display_page_forum($forum) {
   // TODO: User config.
   $limit = 25;
 
-  drupal_set_title($forum->name);
-  $breadcrumb = drupal_set_breadcrumb();
-  $breadcrumb[] = l(t('Archives'), 'archives');
-  drupal_set_breadcrumb($breadcrumb);
+  $breadcrumb = drupal_set_breadcrumb(array(l(t('Archives'), 'archives'), l(ppp_display_title_forum($forum), "forum/{$forum->fid}")));
 
-  $pager = theme('pager', array(), $limit);
-  $topiclist = theme('ppp_display_topiclist', $topics);
+  $page = array();
 
-  $out = '<p class="forum-description">' . $forum->description . '</p>';
-  $out .= $pager . $topiclist . $pager;
-  return $out;
+  $page['description'] = array(
+    '#markup' => $forum->description,
+  );
+  $page['pager'] = array(
+    '#theme' => 'pager',
+  );
+
+  $header = array(
+    'id' => array(
+      'data' => t('#'),
+      'field' => 'tid',
+    ),
+    'title' => array(
+      'data' => t('Title'),
+      'field' => 'title',
+    ),
+    'length' => array(
+      'data' => t('Posts'),
+      'field' => 'length',
+    ),
+    'author' => t('Author'),
+    'started' => t('Started'),
+    'ended' => array(
+      'data' => t('Last post'),
+      'field' => 'ended',
+      'sort' => 'desc',
+    ),
+  );
+
+  $page['topics'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => array(),
+  );
+
+  $topics = $forum->load_topics($header);
+  foreach ($topics as $topic) {
+    $page['topics']['#rows'][$topic->tid] = array(
+      'id' => $topic->tid,
+      'title' => l($topic->title, "topic/{$topic->tid}"),
+      'length' => $topic->length,
+      'author' => ppp_display_userlink($topic->author, $topic->started),
+      'started' => format_date($topic->started),
+      'last' => format_date($topic->ended),
+    );
+  }
+
+  //$out .= $pager . $topiclist . $pager;
+  return $page;
 }
 
 function theme_ppp_display_forum_name($variables) {

@@ -35,7 +35,7 @@ function ppp_display_menu() {
     'type' => MENU_NORMAL_ITEM,
   );
 
-  $menu['forum/%ppp_data_forum'] = array(
+  $menu['forum/%ppp_forum'] = array(
     'title callback' => 'ppp_display_title_forum',
     'title arguments' => array(1),
     'page callback' => 'ppp_display_page_forum',
@@ -46,7 +46,7 @@ function ppp_display_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $menu['topic/%ppp_data_topic'] = array(
+  $menu['topic/%ppp_topic'] = array(
     'title callback' => 'ppp_display_title_topic',
     'title arguments' => array(1),
     'page callback' => 'ppp_display_page_topic',
@@ -101,7 +101,7 @@ function ppp_display_theme() {
 function ppp_display_access_forum($forum) {
   $mod_boards = variable_get('ppp_classified_fora', array());
 
-  if (!empty($mod_boards[$forum])) {
+  if (!empty($mod_boards[$forum->fid])) {
     return user_access('view classified content');
   }
   else {
@@ -112,5 +112,19 @@ function ppp_display_access_forum($forum) {
 function ppp_display_userlink($uid, $date = NULL) {
   module_load_include('inc', 'ppp_data', 'ppp_data.load');
   $user = ppp_data_load_user($uid, $date);
-  return l($user->fields['displayed_name'], "user/$uid");
+  if ($user) {
+    return l($user->fields['displayed_name'], "user/$uid");
+  }
+  else {
+    return t('Anonymous');
+  }
+}
+
+function ppp_forum_load($fid) {
+  module_load_include('inc', 'ppp_data', 'ppp_data.load');
+  return ppp_data_forum_load($fid);
+}
+
+function ppp_display_title_forum($forum) {
+  return t('Forum: !name', array('!name' => $forum->name));
 }
