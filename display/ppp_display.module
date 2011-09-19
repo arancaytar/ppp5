@@ -142,7 +142,7 @@ function ppp_display_title_forum($forum, $html = FALSE) {
     return t('Forum: %name', array('%name' => $forum->name));
   }
   else {
-    return t('Forum: !name', array('!name' => $forum->name));
+    return t('Forum: @name', array('!name' => $forum->name));
   }
 }
 
@@ -154,6 +154,6 @@ function ppp_display_title_topic($topic, $html = FALSE) {
     return t('Topic: %name', array('%name' => $topic->title));
   }
   else {
-    return t('Topic: !name', array('!name' => $topic->title));
+    return t('Topic: @name', array('@name' => $topic->title));
   }
 }
