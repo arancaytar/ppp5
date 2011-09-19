@@ -58,7 +58,7 @@ function ppp_display_page_forum($forum) {
   // TODO: User config.
   $limit = 25;
 
-  $breadcrumb = drupal_set_breadcrumb(array(l(t('Archives'), 'archives'), l(ppp_display_title_forum($forum, TRUE), "forum/{$forum->fid}")));
+  $breadcrumb = drupal_set_breadcrumb(array(l(t('Archives'), 'archives'), l(ppp_display_title_forum($forum, TRUE), "forum/{$forum->fid}", array('html' => TRUE))));
 
   $page = array(
     'description' => array(
