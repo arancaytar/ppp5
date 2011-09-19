@@ -75,27 +75,52 @@ function ppp_display_perm() {
  */
 function ppp_display_theme() {
   $theme['ppp_display_forum_name'] = array(
-    'arguments' => array('forum' => NULL),
+    'variables' => array('forum' => NULL),
   );
-  $theme['ppp_display_postlist'] = array(
-    'arguments' => array('posts' => NULL, 'topic' => NULL, 'forum' => NULL),
+  $theme['ppp_display_post_author'] = array(
+    'variables' => array('post' => NULL, 'topic' => NULL, 'user' => NULL),
+  );
+  $theme['ppp_display_post_content'] = array(
+    'variables' => array('posts' => NULL, 'topic' => NULL, 'user' => NULL),
   );
   $theme['ppp_display_forum_last'] = array(
-    'arguments' => array('post' => NULL),
+    'variables' => array('post' => NULL),
   );
   return $theme;
 }
 
 /**
- * Determine whether the current user may view a certain forum or topic
+ * Determine whether the current user may view a certain forum.
  *
  * @param $forum
- *   The number of the forum that is being requested, or the forum the topic is in.
+ *   The number of the forum that is being requested.
  *
  * @return
  *   A user access boolean.
  */
 function ppp_display_access_forum($forum) {
+  $mod_boards = variable_get('ppp_classified_fora', array());
+
+  if (!empty($mod_boards[$forum->fid])) {
+    return user_access('view classified content');
+  }
+  else {
+    return user_access('view archived content');
+  }
+}
+
+/**
+ * Determine whether the current user may view a certain topic. This is only
+ * dependent on the forum the topic is in.
+ *
+ * @param $topic
+ *   The number of the topic that is being requested.
+ *
+ * @return
+ *   A user access boolean.
+ */
+function ppp_display_access_topic($topic) {
+  $forum = $topic->get_forum();
   $mod_boards = variable_get('ppp_classified_fora', array());
 
   if (!empty($mod_boards[$forum->fid])) {
@@ -131,7 +156,7 @@ function ppp_forum_load($fid) {
  */
 function ppp_topic_load($tid) {
   module_load_include('inc', 'ppp_data', 'ppp_data.load');
-  return ppp_data_load_topic($fid);
+  return ppp_data_load_topic($tid);
 }
 
 /**

@@ -116,6 +116,47 @@ function ppp_display_page_forum($forum) {
 }
 
 /**
+ * Display one topic.
+ */
+function ppp_display_page_topic($topic) {
+  $forum = $topic->get_forum();
+  drupal_set_breadcrumb(array(
+      l(t('Archives'), 'archives'),
+      l(ppp_display_title_forum($forum, TRUE), "forum/{$forum->fid}", array('html' => TRUE)),
+      l(ppp_display_title_topic($topic, TRUE), "topic/{$topic->tid}", array('html' => TRUE)),
+  ));
+
+  $pager = array('#theme' => 'pager');
+  $posts = $topic->load_posts();
+  $page = array(
+    'pager_top' => $pager,
+    'topic' => array(
+      '#theme' => 'table',
+      '#sticky' => FALSE,
+      '#header' => array(t('Author'), t('Content')),
+      '#rows' => array(),
+    ),
+    'pager_bottom' => $pager,
+  );
+
+  foreach ($posts as $pid => $post) {
+    $page['topic']['#rows'][$pid] = array(
+      'author' => theme('ppp_display_post_author', array(
+        'topic' => $topic,
+        'post' => $post,
+        'user' => $post->get_author(),
+      )),
+      'content' => theme('ppp_display_post_content', array(
+        'topic' => $topic,
+        'post' => $post,
+        'user' => $post->get_author(),
+      )),
+    );
+  }
+  return $page;
+}
+
+/**
  * Render the name and description of a forum for the main page.
  */
 function theme_ppp_display_forum_name($variables) {
@@ -133,6 +174,14 @@ function theme_ppp_display_forum_name($variables) {
 function theme_ppp_display_forum_last($variables) {
   $post = $variables['post'];
   return t('<span style="white-space: nowrap">In <a href="@url">%topic</a></span> <span style="white-space: nowrap">by !user</span> <span style="white-space: nowrap"> at %time</p>', array('@url' => url('topic/' . $post->tid), '%topic' => $post->title, '!user' => _ppp_display_userlink($post->author, $post->ended), '%time' => format_date($post->ended)));
+}
+
+function theme_ppp_display_post_author($variables) {
+  return print_r($variables['user'], TRUE);
+}
+
+function theme_ppp_display_post_content($variables) {
+  return print_r($variables['post'], TRUE);
 }
 
 /**
