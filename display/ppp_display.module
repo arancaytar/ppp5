@@ -142,7 +142,7 @@ function ppp_display_title_forum($forum, $html = FALSE) {
     return t('Forum: %name', array('%name' => $forum->name));
   }
   else {
-    return t('Forum: @name', array('!name' => $forum->name));
+    return t('Forum: @name', array('@name' => $forum->name));
   }
 }
 
