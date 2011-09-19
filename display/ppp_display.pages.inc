@@ -103,7 +103,7 @@ function ppp_display_page_forum($forum) {
       'id' => $topic->tid,
       'title' => l($topic->title, "topic/{$topic->tid}"),
       'length' => $topic->length,
-      'author' => ppp_display_userlink($topic->author, $topic->started),
+      'author' => _ppp_display_userlink($topic->author, $topic->started),
       'started' => format_date($topic->started),
       'last' => format_date($topic->ended),
     );
@@ -127,16 +127,19 @@ function theme_ppp_display_forum_name($variables) {
  */
 function theme_ppp_display_forum_last($variables) {
   $post = $variables['post'];
-  return t('<span style="white-space: nowrap">In <a href="@url">%topic</a></span> <span style="white-space: nowrap">by !user</span> <span style="white-space: nowrap"> at %time</p>', array('@url' => url('topic/' . $post->tid), '%topic' => $post->title, '!user' => ppp_display_userlink($post->author, $post->ended), '%time' => format_date($post->ended)));
+  return t('<span style="white-space: nowrap">In <a href="@url">%topic</a></span> <span style="white-space: nowrap">by !user</span> <span style="white-space: nowrap"> at %time</p>', array('@url' => url('topic/' . $post->tid), '%topic' => $post->title, '!user' => _ppp_display_userlink($post->author, $post->ended), '%time' => format_date($post->ended)));
 }
 
-function ppp_display_userlink($uid, $date = NULL) {
+/**
+ * Create a link to a user using a time-appropriate name if possible.
+ */
+function _ppp_display_userlink($uid, $date = NULL) {
   module_load_include('inc', 'ppp_data', 'ppp_data.load');
   $user = ppp_data_load_user($uid, $date);
   if ($user) {
     return l($user->fields['displayed_name'], "user/$uid");
   }
   else {
-    return t('Anonymous');
+    return t('User #%uid', array('%uid' => $uid));
   }
 }
