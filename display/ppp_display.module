@@ -77,9 +77,6 @@ function ppp_display_theme() {
   $theme['ppp_display_forum_name'] = array(
     'arguments' => array('forum' => NULL),
   );
-  $theme['ppp_display_topiclist'] = array(
-    'arguments' => array('topics' => NULL, 'forum' => NULL),
-  );
   $theme['ppp_display_postlist'] = array(
     'arguments' => array('posts' => NULL, 'topic' => NULL, 'forum' => NULL),
   );
