@@ -122,11 +122,6 @@ function ppp_data_schema() {
         'description' => 'Content of the post',
         'type' => 'text',
       ),
-      'ip' => array(
-        'description' => 'IP used to submit this post',
-        'type' => 'varchar',
-        'length' => '15',
-      ),
     ),
     'primary key' => array('pid'),
     'indexes' => array(
@@ -190,6 +185,11 @@ function ppp_data_schema() {
         'description' => 'Primary user ID on Spiderweb.',
         'type' => 'int',
       ),
+      'pdn' => array(
+        'description' => 'Current displayed name (denormalized upward).',
+        'type' => 'varchar',
+        'length' => 36,
+      ),
       'joined' => array(
         'description' => 'Unix timestamp of the creation of this account.',
         'type' => 'int',
@@ -208,7 +208,12 @@ function ppp_data_schema() {
       ),
     ),
     'primary key' => array('uid'),
-    'unique' => array('login'),
+    'indexes' => array(
+      'pdn' => array('pdn'),
+      'joined' => array('joined'),
+      'posts' => array('posts'),
+      'updated' => array('updated'),
+    ),
   );
 
   $schema['user_field'] = array(
@@ -238,7 +243,7 @@ function ppp_data_schema() {
     'fields' => array(
       'aid' => array(
         'description' => 'Artificial auto-incrementing field ID',
-        'type' => 'int',
+        'type' => 'serial',
       ),
       'uid' => array(
         'description' => 'User ID',
@@ -262,6 +267,11 @@ function ppp_data_schema() {
         'description' => 'Timestamp of the moment this field was replaced, or NULL if the field is current.',
         'type' => 'int',
       ),
+    ),
+    'primary key' => array('aid'),
+    'unique' => array('uid', 'field', 'created'),
+    'indexes' => array(
+      'created' => array('created'),
     ),
   );
 
