@@ -60,13 +60,13 @@ function ppp_display_page_forum($forum) {
 
   $breadcrumb = drupal_set_breadcrumb(array(l(t('Archives'), 'archives'), l(ppp_display_title_forum($forum), "forum/{$forum->fid}")));
 
-  $page = array();
-
-  $page['description'] = array(
-    '#markup' => $forum->description,
-  );
-  $page['pager'] = array(
-    '#theme' => 'pager',
+  $page = array(
+    'description' => array(
+      '#markup' => $forum->description,
+    ),
+    'pager' => array(
+      '#theme' => 'pager',
+    ),
   );
 
   $header = array(
@@ -97,7 +97,7 @@ function ppp_display_page_forum($forum) {
     '#rows' => array(),
   );
 
-  $topics = $forum->load_topics($header);
+  $topics = $forum->load_topics($header, $limit);
   foreach ($topics as $topic) {
     $page['topics']['#rows'][$topic->tid] = array(
       'id' => $topic->tid,
