@@ -63,12 +63,13 @@ class PPPTopic extends PPPDataObject {
     return 'Topic <' . parent::__tostring() . '>';
   }
 
-  function load_posts($range) {
+  function load_posts() {
     module_load_include('inc', 'ppp_data', 'ppp_data.load');
-    return ppp_data_load_posts(array('topic' => $this->tid), array('field' => 'pid', 'direction' => 'asc'), $range);
+    return ppp_data_load_posts(array('topic' => $this->tid));
   }
 
   function get_forum() {
+    module_load_include('inc', 'ppp_data', 'ppp_data.load');
     return ppp_data_load_forum($this->forum);
   }
 }
@@ -84,6 +85,11 @@ class PPPPost extends PPPDataObject {
 
   function __tostring() {
     return "Post <" . parent::__tostring() . ">";
+  }
+
+  function get_author() {
+    module_load_include('inc', 'ppp_data', 'ppp_data.load');
+    return ppp_data_load_user($this->author, $this->created);
   }
 }
 

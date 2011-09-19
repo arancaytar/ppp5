@@ -222,7 +222,6 @@ function ppp_data_load_posts($condition, $limit = 25, $header = NULL) {
   $query->addField('p', 'created');
   $query->addField('p', 'icon');
   $query->addField('p', 'body');
-  $query->addField('p', 'ip');
 
   foreach ($condition as $field => $value) {
     $query->condition($field, $value);
@@ -236,7 +235,7 @@ function ppp_data_load_posts($condition, $limit = 25, $header = NULL) {
 
   $posts = array();
   while ($row = $result->fetch()) {
-    $posts[$row->pid] = $row;
+    $posts[$row->pid] = new PPPPost($row); // PPPPowerbook!
   }
   return $posts;
 }
