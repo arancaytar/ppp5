@@ -212,8 +212,8 @@ function ppp_data_load_categories() {
  * @return
  *   A post object.
  */
-function ppp_data_load_posts($condition, $sort = array(), $range = array()) {
-  $query = db_select('ppp_post', 'p');
+function ppp_data_load_posts($condition, $limit = 25, $header = NULL) {
+  $query = db_select('ppp_post', 'p')->extend('PagerDefault');
 
   $query->addField('p', 'pid');
   $query->addField('p', 'topic');
@@ -227,12 +227,11 @@ function ppp_data_load_posts($condition, $sort = array(), $range = array()) {
   foreach ($condition as $field => $value) {
     $query->condition($field, $value);
   }
-  if ($sort) {
-    $query->orderBy($sort['field'], $sort['direction']);
+  if ($header) {
+    $query->extend('TableSort');
+    $query->orderByHeader($header);
   }
-  if ($range) {
-    $query->range((int)$range['start'], (int)$range['count']);
-  }
+  $query->limit($limit);
   $result = $query->execute();
 
   $posts = array();

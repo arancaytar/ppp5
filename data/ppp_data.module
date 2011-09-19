@@ -67,6 +67,10 @@ class PPPTopic extends PPPDataObject {
     module_load_include('inc', 'ppp_data', 'ppp_data.load');
     return ppp_data_load_posts(array('topic' => $this->tid), array('field' => 'pid', 'direction' => 'asc'), $range);
   }
+
+  function get_forum() {
+    return ppp_data_load_forum($this->forum);
+  }
 }
 
 /**
