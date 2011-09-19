@@ -106,11 +106,54 @@ function ppp_display_access_forum($forum) {
   }
 }
 
+/**
+ * Automatically load a forum object by its ID for the menu system.
+ *
+ * @param $fid
+ *   The ID of the forum.
+ *
+ * @return
+ *   The loaded forum object.
+ */
 function ppp_forum_load($fid) {
   module_load_include('inc', 'ppp_data', 'ppp_data.load');
   return ppp_data_load_forum($fid);
 }
 
-function ppp_display_title_forum($forum) {
-  return t('Forum: !name', array('!name' => $forum->name));
+/**
+ * Automatically load a topic object by its ID for the menu system.
+ *
+ * @param $tid
+ *   The ID of the topic.
+ *
+ * @return
+ *   The loaded topic object.
+ */
+function ppp_topic_load($tid) {
+  module_load_include('inc', 'ppp_data', 'ppp_data.load');
+  return ppp_data_load_topic($fid);
+}
+
+/**
+ * Generate the title for a forum.
+ */
+function ppp_display_title_forum($forum, $html = FALSE) {
+  if ($html) {
+    return t('Forum: %name', array('%name' => $forum->name));
+  }
+  else {
+    return t('Forum: !name', array('!name' => $forum->name));
+  }
+}
+
+/**
+ * Generate the title for a topic.
+ */
+function ppp_display_title_topic($topic, $html = FALSE) {
+  if ($html) {
+    return t('Topic: %name', array('%name' => $topic->title));
+  }
+  else {
+    return t('Topic: !name', array('!name' => $topic->title));
+  }
 }

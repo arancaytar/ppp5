@@ -58,7 +58,7 @@ function ppp_display_page_forum($forum) {
   // TODO: User config.
   $limit = 25;
 
-  $breadcrumb = drupal_set_breadcrumb(array(l(t('Archives'), 'archives'), l(ppp_display_title_forum($forum), "forum/{$forum->fid}")));
+  $breadcrumb = drupal_set_breadcrumb(array(l(t('Archives'), 'archives'), l(ppp_display_title_forum($forum, TRUE), "forum/{$forum->fid}")));
 
   $page = array(
     'description' => array(
@@ -109,10 +109,12 @@ function ppp_display_page_forum($forum) {
     );
   }
 
-  //$out .= $pager . $topiclist . $pager;
   return $page;
 }
 
+/**
+ * Render the name and description of a forum for the main page.
+ */
 function theme_ppp_display_forum_name($variables) {
   $forum = $variables['forum'];
   $link['attributes'] = array(
