@@ -129,3 +129,14 @@ function theme_ppp_display_forum_last($variables) {
   $post = $variables['post'];
   return t('<span style="white-space: nowrap">In <a href="@url">%topic</a></span> <span style="white-space: nowrap">by !user</span> <span style="white-space: nowrap"> at %time</p>', array('@url' => url('topic/' . $post->tid), '%topic' => $post->title, '!user' => ppp_display_userlink($post->author, $post->ended), '%time' => format_date($post->ended)));
 }
+
+function ppp_display_userlink($uid, $date = NULL) {
+  module_load_include('inc', 'ppp_data', 'ppp_data.load');
+  $user = ppp_data_load_user($uid, $date);
+  if ($user) {
+    return l($user->fields['displayed_name'], "user/$uid");
+  }
+  else {
+    return t('Anonymous');
+  }
+}

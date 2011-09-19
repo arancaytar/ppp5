@@ -109,17 +109,6 @@ function ppp_display_access_forum($forum) {
   }
 }
 
-function ppp_display_userlink($uid, $date = NULL) {
-  module_load_include('inc', 'ppp_data', 'ppp_data.load');
-  $user = ppp_data_load_user($uid, $date);
-  if ($user) {
-    return l($user->fields['displayed_name'], "user/$uid");
-  }
-  else {
-    return t('Anonymous');
-  }
-}
-
 function ppp_forum_load($fid) {
   module_load_include('inc', 'ppp_data', 'ppp_data.load');
   return ppp_data_load_forum($fid);
