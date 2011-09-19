@@ -122,7 +122,7 @@ function ppp_display_userlink($uid, $date = NULL) {
 
 function ppp_forum_load($fid) {
   module_load_include('inc', 'ppp_data', 'ppp_data.load');
-  return ppp_data_forum_load($fid);
+  return ppp_data_load_forum($fid);
 }
 
 function ppp_display_title_forum($forum) {

@@ -99,7 +99,7 @@ function ppp_data_load_post($pid) {
  * @return
  *   A topic object.
  */
-function ppp_data_topic_load($tid) {
+function ppp_data_load_topic($tid) {
   return new PPPTopic(db_query('SELECT * FROM {ppp_topic} WHERE tid = :tid', array(':tid' => (int)$tid))->fetch());
 }
 
@@ -112,7 +112,7 @@ function ppp_data_topic_load($tid) {
  * @return
  *   A forum object
  */
-function ppp_data_forum_load($fid) {
+function ppp_data_load_forum($fid) {
   return new PPPForum(db_query('SELECT * FROM {ppp_forum} WHERE fid = :fid', array(':fid' => (int)$fid))->fetch());
 }
 
