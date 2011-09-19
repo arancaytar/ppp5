@@ -121,7 +121,11 @@ function ppp_data_save_category($category) {
  */
 function ppp_data_save_user($user) {
   module_load_include('inc', 'ppp_data', 'ppp_data.load');
-  $old_user = ppp_data_load_user($user->uid);
+  $query = db_query('SELECT * FROM {ppp_user_profile} WHERE uid = :uid AND expired IS NULL', array(':uid' => $user->uid));
+  $old_fields = array();
+  while ($row = $query->fetch()) {
+    $old_fields[$row->fid] = $row;
+  }
   $fields = ppp_data_load_fields();
   $added = array();
 
@@ -130,20 +134,22 @@ function ppp_data_save_user($user) {
   }
 
   // If a user is already here, use a lot of intricate logic to update fields.
-  if ($old_user) {
+  if ($old_fields) {
     $expired = array();
 
     // Find values that have been deleted, added or changed.
-    foreach ($fields as $fid => $name) {
-      if (isset($old_user->fields[$name])) {
-        if (!isset($user->fields[$name]) || $old_user->fields[$name]->value != $user->fields[$name]->value) {
-          $expired[$old_user->fields[$name]->aid] = $field->aid;
+    foreach ($fields as $fid => $field) {
+      // If an old field exists that is now gone or changed, mark it expired.
+      if (isset($old_fields[$row->fid])) {
+        if (!isset($user->fields[$field->name]) || $old_fields[$fid]->value != $user->fields[$field->name]) {
+          $expired[$old_user->fields[$field->name]->aid] = $field->aid;
         }
       }
 
-      if (isset($user->fields[$name])) {
-        if (!isset($old_user->fields[$name]) || $old_user->fields[$name]->value != $user->fields[$name]->value) {
-          $added[$fid] = $user->fields[$field]->value;
+      // If a new field exists that was not there before, add it.
+      if (isset($user->fields[$field->name])) {
+        if (!isset($old_fields[$fid]) || $old_fields[$fid]->value != $user->fields[$name]) {
+          $added[$fid] = $user->fields[$field->name];
         }
       }
     }
@@ -174,6 +180,7 @@ function ppp_data_save_user($user) {
 
   // Finally, save the user, whether it exists or not.
   db_merge('ppp_user')->key(array('uid' => (int)$user->uid))->fields(array(
+      'pdn' => "{$user->fields['displayed_name']}",
       'joined' => (int)$user->joined,
       'posts' => (int)$user->posts,
       // Ensure valid pseudo-enum.
