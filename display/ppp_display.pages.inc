@@ -212,7 +212,9 @@ function theme_ppp_display_post_content($variables) {
     $post->body = check_markup($post->body, 'xbbcode');
   }
 
-  $out = '<p class="post-header" id="' . $post->pid . '">#' . $post->pid . '</p>';
+  $out = '<p class="post-header" id="' . $post->pid . '">';
+  $out .= t('Post #%pid, written at <span class="date">!date</date>', array('%pid' => $post->pid, '!date' => format_date($post->created)));
+  $out .= '</p>';
   $out .= '<hr />';
   $out .= '<div class="post-body">' . $post->body . '</div>';
   $out .= '<hr />';
@@ -221,7 +223,7 @@ function theme_ppp_display_post_content($variables) {
   if (isset($user->fields['location'])) {
     $out .= ' | ' . t('From %location', array('%location' => $user->fields['location']));
   }
-  $out .= ' | ' . t('Registered %date', array('%date' => format_date($user->joined)));
+  $out .= ' | ' . t('Registered <em class="placeholder date">!date</em>', array('!date' => format_date($user->joined)));
   $out .= '</p>';
   return $out;
 }
