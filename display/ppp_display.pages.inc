@@ -190,9 +190,12 @@ function theme_ppp_display_post_author($variables) {
 function theme_ppp_display_post_content($variables) {
   $post = $variables['post'];
   $user = $variables['user'];
+
+  // The following requires xbbcode, available at http://ermarian.net/xbbcode/
   if (filter_format_exists('xbbcode')) {
     $post->body = check_markup($post->body, 'xbbcode');
   }
+
   $out = '<p class="post-header" id="' . $post->pid . '">#' . $post->pid . '</p>';
   $out .= '<hr />';
   $out .= '<div class="post-body">' . $post->body . '</div>';
