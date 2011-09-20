@@ -44,7 +44,7 @@ function ppp_data_schema() {
       'title' => array(
         'description' => 'Title of the topic',
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 4096,
       ),
       'closed' => array(
         'description' => 'Whether this topic is closed (1 for true).',
@@ -257,7 +257,7 @@ function ppp_data_schema() {
         'description' => 'Value of this field',
         'type' => 'varchar',
         // Forgive me, Codd.
-        'length' => 255,
+        'length' => 750,
       ),
       'created' => array(
         'description' => 'Timestamp of the first discovery of this value.',
@@ -305,7 +305,7 @@ function ppp_data_schema() {
       'title' => array(
         'description' => 'Title of this topic. Preliminary info to help piperbot decide.',
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 4096,
       ),
     ),
     'primary key' => array('post'),
@@ -359,4 +359,3 @@ function _ppp_data_profile_field_info() {
     'signature' => 'Signature',
   );
 }
-
