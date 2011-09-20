@@ -413,8 +413,12 @@ function spiderweb_parse_user($data) {
   preg_match('%<title>Profile for (.*?) - Spiderweb Software Forum</title>%', $data, $match);
   $user->fields['displayed_name'] = $match[1];
 
-  preg_match('%<span class="date">(.*?)</span>%', $data, $match);
-  $user->joined = strtotime($match[1]) - TIME_OFFSET;
+  preg_match('%<span class="date">(.*?)(at)?</span>%', $data, $match);
+  $date = $match[1];
+  if (preg_match('%<span class="time">(.*?)</span>%', $data, $match)) {
+    $date .= $match[1];
+  }
+  $user->joined = strtotime($date) - TIME_OFFSET;
 
   preg_match('%<b>Total Posts:</b>.*?&nbsp;  ([0-9]+) &nbsp;%s', $data, $match);
   $user->posts = (int) $match[1];
