@@ -135,17 +135,21 @@ function ppp_display_page_topic($topic) {
       '#sticky' => FALSE,
       '#header' => array(t('Author'), t('Content')),
       '#rows' => array(),
+      '#attributes' => array('class' => array('topic-table')),
     ),
     'pager_bottom' => $pager,
   );
 
   foreach ($posts as $pid => $post) {
     $page['topic']['#rows'][$pid] = array(
-      'author' => theme('ppp_display_post_author', array(
-        'topic' => $topic,
-        'post' => $post,
-        'user' => $post->get_author(),
-      )),
+      'author' => array(
+        'data' => theme('ppp_display_post_author', array(
+          'topic' => $topic,
+          'post' => $post,
+          'user' => $post->get_author(),
+        )),
+        'valign' => 'top',
+      ),
       'content' => theme('ppp_display_post_content', array(
         'topic' => $topic,
         'post' => $post,
@@ -177,11 +181,30 @@ function theme_ppp_display_forum_last($variables) {
 }
 
 function theme_ppp_display_post_author($variables) {
-  return print_r($variables['user'], TRUE);
+  $user = $variables['user'];
+  $out = '<p><a class="username" href="' . url("user/{$user->uid}") . '">' . $user->pdn . '</a><br />';
+  $out .= '<span class="title">' . $user->fields['title'] . '</span></p>';
+  return $out;
 }
 
 function theme_ppp_display_post_content($variables) {
-  return print_r($variables['post'], TRUE);
+  $post = $variables['post'];
+  $user = $variables['user'];
+  if (filter_format_exists('xbbcode')) {
+    $post->body = check_markup($post->body, 'xbbcode');
+  }
+  $out = '<p class="post-header" id="' . $post->pid . '">#' . $post->pid . '</p>';
+  $out .= '<hr />';
+  $out .= '<div class="post-body">' . $post->body . '</div>';
+  $out .= '<hr />';
+  $out .= '<p class="post-footer">';
+  $out .= t('Posts: %posts', array('%posts' => $user->posts));
+  if (isset($user->fields['location'])) {
+    $out .= ' | ' . t('From %location', array('%location' => $user->fields['location']));
+  }
+  $out .= ' | ' . t('Registered %date', array('%date' => format_date($user->joined)));
+  $out .= '</p>';
+  return $out;
 }
 
 /**
