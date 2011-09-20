@@ -124,13 +124,13 @@ function ppp_data_save_user($user) {
   $query = db_query('SELECT * FROM {ppp_user_profile} WHERE uid = :uid AND expired IS NULL', array(':uid' => $user->uid));
   $old_fields = array();
   while ($row = $query->fetch()) {
-    $old_fields[$row->fid] = $row;
+    $old_fields[$row->field] = $row;
   }
   $fields = ppp_data_load_fields();
   $added = array();
 
   if (!isset($user->updated)) {
-    $user->updated = REQUEST_TIME;
+    $user->updated = time();
   }
 
   // If a user is already here, use a lot of intricate logic to update fields.
@@ -140,7 +140,7 @@ function ppp_data_save_user($user) {
     // Find values that have been deleted, added or changed.
     foreach ($fields as $fid => $field) {
       // If an old field exists that is now gone or changed, mark it expired.
-      if (isset($old_fields[$row->fid])) {
+      if (isset($old_fields[$fid])) {
         if (!isset($user->fields[$field->name]) || $old_fields[$fid]->value != $user->fields[$field->name]) {
           $expired[$old_user->fields[$field->name]->aid] = $field->aid;
         }
@@ -148,14 +148,16 @@ function ppp_data_save_user($user) {
 
       // If a new field exists that was not there before, add it.
       if (isset($user->fields[$field->name])) {
-        if (!isset($old_fields[$fid]) || $old_fields[$fid]->value != $user->fields[$name]) {
+        if (!isset($old_fields[$fid]) || $old_fields[$fid]->value != $user->fields[$field->name]) {
           $added[$fid] = $user->fields[$field->name];
         }
       }
     }
 
     // Add an expiration timestamp to old fields.
-    db_update('ppp_user_profile')->fields(array('expired' => (int) $user->updated))->condition('aid', $expired, 'IN')->execute();
+    if ($expired) {
+      db_update('ppp_user_profile')->fields(array('expired' => (int) $user->updated))->condition('aid', $expired, 'IN')->execute();
+    }
   }
   else {
     // Since the user does not exist yet, all fields are considered new, and no fields are expired.
