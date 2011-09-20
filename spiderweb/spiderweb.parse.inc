@@ -447,7 +447,7 @@ function spiderweb_parse_user($data) {
   );
 
   foreach ($fields as $name => $title) {
-    if (preg_match('%<td valign="top">.*?' . $title . ':\s*?</td>\s*?<td valign="top">\s*?&nbsp;\s*?([^\s]([^\r\n]*?[^\s])?)\s*?</td>%s', $data, $match)) {
+    if (preg_match('%<td valign=.top.>.*?' . $title . ':\s*?</td>\s*?<td valign=.top.>\s*?&nbsp;\s*?([^\s]([^\r\n]*?[^\s])?)\s*?</td>%s', $data, $match)) {
       $user->fields[$name] = check_plain($match[1]);
     }
   }
