@@ -193,7 +193,7 @@ function spiderweb_parse_topic($data) {
  */
 function spiderweb_parse_post($data) {
   $post = (object) array();
-  if (preg_match('%<span id="number(?P<pid>[0-9]+)">.*<span class="date">(?<date>.*?)(?:at)?</span>(?: <span class="time">(?P<time>.*?)</span>)?%', $data, $meta)) {
+  if (preg_match('%<span id="number(?P<pid>[0-9]+)">.*<span class="date">(?P<date>.*?)(?:at)?</span>(?: <span class="time">(?P<time>.*?)</span>)?%', $data, $meta)) {
     $post->pid = $meta['pid'];
     $date = $meta['date'];
     // Relative timestamps consist of two spans, and the "at" breaks strtotime.
@@ -206,14 +206,14 @@ function spiderweb_parse_post($data) {
     return FALSE;
   }
 
-  if (preg_match('%(?<body><div id="body[0-9]+">.*</div>)%s', $data, $body)) {
+  if (preg_match('%(?P<body><div id="body[0-9]+">.*</div>)%s', $data, $body)) {
     $post->body = spiderweb_parse_bbcode_reverse($body['body']);
   }
   else {
     return FALSE;
   }
 
-  if (preg_match('%<img src="/forum/images/icons/default/(?<icon>.*?)" alt="" />%', $data, $icon)) {
+  if (preg_match('%<img src="/forum/images/icons/default/(?P<icon>.*?)" alt="" />%', $data, $icon)) {
     $post->icon = spiderweb_parse_icon_reverse($icon['icon']);
   }
   else {
