@@ -206,7 +206,7 @@ function spiderweb_parse_post($data) {
     return FALSE;
   }
 
-  if (preg_match('%(?P<body><div id="body[0-9]+">.*</div>)%s', $data, $body)) {
+  if (preg_match('%<div id="body[0-9]+">(?P<body>.*)</div>%s', $data, $body)) {
     $post->body = spiderweb_parse_bbcode_reverse($body['body']);
   }
   else {
@@ -264,7 +264,7 @@ function spiderweb_parse_bbcode_reverse($dom) {
   // Reparse now that the quotes are removed.
   if ($clear) $dom->clear();
   $dom = spiderweb_html_parse($result);
-  $result = $dom->find('div', 0)->innertext;
+  $result = $dom->innertext;
 
   foreach ($dom->find('span[style]') as $span) {
     if (strpos($span->style, ': ') > 0) {
@@ -432,6 +432,10 @@ function spiderweb_parse_user($data) {
 
   if (preg_match('/<a href="(.*?)" target="new">/', $data, $match)) {
     $user->fields['url'] = $match[1];
+  }
+
+  if (preg_match('%<td class="tdheader">.*?\'s Signature\s*</td>\s*</tr>\s*<tr>\s*<td class="alt-1">\s*(.+?)\s*</td>%s', $data, $match)) {
+    $user->fields['signature'] = spiderweb_parse_bbcode_reverse($match[1]);
   }
 
   $fields = array(
