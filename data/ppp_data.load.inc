@@ -296,7 +296,7 @@ function ppp_data_load_topics($condition, $header = NULL, $limit = 25) {
  * @return
  *   An array of topics [ int post : object topic {int archived, int updated, int forum, int author, int length, string title}]
  */
-function ppp_data_load_crawl() {
+function ppp_data_load_crawl($limit = 0) {
   $query = db_select('ppp_crawl', 'c');
   $query->addField('c', 'post');
   $query->addField('c', 'archived');
@@ -306,9 +306,11 @@ function ppp_data_load_crawl() {
   $query->addField('c', 'length');
   $query->addField('c', 'title');
 
-  $condition = db_or()->condition('`archived` < `updated`', array(), NULL)->condition('`archived` IS NULL', array(), NULL);
-
+  $condition = db_or()->where('`archived` < `updated`')->condition('archived', NULL, 'IS NULL');
   $query->condition($condition);
+  if ($limit) {
+    $query->range(0, $limit);
+  }
   $result = $query->execute();
 
   $topics = array();
