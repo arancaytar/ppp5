@@ -257,7 +257,7 @@ function ppp_data_schema() {
         'description' => 'Value of this field',
         'type' => 'varchar',
         // Forgive me, Codd.
-        'length' => 750,
+        'length' => 1046,
       ),
       'created' => array(
         'description' => 'Timestamp of the first discovery of this value.',
