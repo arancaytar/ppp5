@@ -257,7 +257,8 @@ function ppp_data_schema() {
         'description' => 'Value of this field',
         'type' => 'varchar',
         // Forgive me, Codd.
-        'length' => 1046,
+        // Longest signature on record is 1882 chars. Avoid magic numbers.
+        'length' => 2048,
       ),
       'created' => array(
         'description' => 'Timestamp of the first discovery of this value.',
