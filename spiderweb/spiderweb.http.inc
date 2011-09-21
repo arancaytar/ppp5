@@ -104,8 +104,9 @@ function spiderweb_post($fields, $page = 'ubbthreads.php', $cookies = NULL) {
  * @return
  *   A full HTTP response object as returned by drupal_http_request().
  */
-function spiderweb_get($fields, $page = 'ubbthreads.php', $cookies = NULL) {
+function spiderweb_get($fields, $page = 'ubbthreads.php', $cookies = "") {
   $url = SPIDERWEB_URL . "/$page";
+  if (!$cookies) $cookies = 'ubbt_myid=0; PHPSESSID=00000000000000000000000000000000';
   $options = array(
     'headers' => array('Cookie' => $cookies),
   );
