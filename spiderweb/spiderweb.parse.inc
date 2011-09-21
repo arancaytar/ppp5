@@ -81,7 +81,7 @@ function spiderweb_parse_forum($data) {
   $forum->pages  = 1;
   $forum->topics = array();
 
-  if (preg_match('/Page [0-9]+ of ([0-9+])/', $html->find('td.tdheader', 0)->innertext, $match)) {
+  if (preg_match('/Page [0-9]+ of ([0-9]+)/', $html->find('td.tdheader', 0)->innertext, $match)) {
     $forum->pages = $match[1];
   }
 
