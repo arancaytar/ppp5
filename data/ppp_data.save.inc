@@ -142,7 +142,7 @@ function ppp_data_save_user($user) {
       // If an old field exists that is now gone or changed, mark it expired.
       if (isset($old_fields[$fid])) {
         if (!isset($user->fields[$field->name]) || $old_fields[$fid]->value != $user->fields[$field->name]) {
-          $expired[$old_fields[$fid]->aid] = $field->aid;
+          $expired[$old_fields[$fid]->aid] = $old_fields[$fid]->aid;
         }
       }
 
