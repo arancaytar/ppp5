@@ -269,7 +269,11 @@ function ppp_data_load_topics($condition, $header = NULL, $limit = 25) {
   $query->addField('t', 'icon');
 
   $query->join('ppp_user', 'u', 't.author = u.uid');
+  $query->join('ppp_post', 'p', 't.tid = p.topic AND t.ended = p.created');
+  $query->join('ppp_user', 'ul', 'p.author = ul.uid');
   $query->addField('u', 'pdn', 'author_pdn');
+  $query->addField('ul', 'uid', 'last_uid');
+  $query->addField('ul', 'pdn', 'last_pdn');
 
   foreach ($condition as $field => $value) {
     $query->condition($field, $value);

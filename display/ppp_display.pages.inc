@@ -92,14 +92,17 @@ function ppp_display_page_forum($forum) {
     'started' => array(
       'data' => t('Started'),
       // Sorting is redundant, but makes the interface more intuitive.
-      'field' => 'tid',
+      'field' => 'started',
     ),
     'ended' => array(
       'data' => t('Last post'),
       'field' => 'ended',
       'sort' => 'desc',
     ),
-    'last' => t('Last poster'),
+    'last' => array(
+      'data' => t('Last poster'),
+      'field' => 'last_pdn',
+    ),
   );
 
   $page['topics'] = array(
@@ -112,11 +115,6 @@ function ppp_display_page_forum($forum) {
   foreach ($topics as $topic) {
     $query = db_select('ppp_post', 'p');
     $query->join('ppp_user', 'u', 'p.author = u.uid');
-    $last = $query->fields('u', array('uid', 'pdn'))
-      ->condition('topic', $topic->tid)
-      ->orderBy('created', 'desc')
-      ->range(0,1)
-      ->execute()->fetch();
     $page['topics']['#rows'][$topic->tid] = array(
       'id' => $topic->tid,
       'title' => l($topic->title, "topic/{$topic->tid}"),
@@ -124,7 +122,7 @@ function ppp_display_page_forum($forum) {
       'author' => l($topic->author_pdn, "user/{$topic->author}"),
       'started' => format_date($topic->started),
       'ended' => format_date($topic->ended),
-      'last' => l($last->pdn, "user{$last->uid}"),
+      'last' => l($topic->last_pdn, "user{$topic->last_uid}"),
     );
   }
 

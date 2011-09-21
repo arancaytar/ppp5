@@ -46,7 +46,7 @@ class PPPForum extends PPPDataObject {
 
   function load_topics($header, $limit) {
     module_load_include('inc', 'ppp_data', 'ppp_data.load');
-    return ppp_data_load_topics(array('forum' => $this->fid), $header, $limit);
+    return ppp_data_load_topics(array('t.forum' => $this->fid), $header, $limit);
   }
 }
 
