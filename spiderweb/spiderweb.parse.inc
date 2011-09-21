@@ -7,7 +7,10 @@
  *   Contains all parser functions of the Spiderweb link.
  */
 
-define('TIME_OFFSET', 9 * 3600);
+/**
+ * Since the upgrade, Spiderweb's server switched from Pacific to Central time.
+ */
+define('SPIDERWEB_TIMEZONE', 'America/Chicago');
 
 /**
  * Parse the front page of the board and retrieve category structure.
@@ -98,7 +101,6 @@ function spiderweb_parse_forum($data) {
     }
 
     $date = $topic->find('span.date', 0)->innertext;
-    // obsolete when the user uses non-relative times.
     if ($time = $topic->find('span.time', 0)) {
       $date = str_replace("at", "", "$date $time->innertext");
     }
@@ -107,12 +109,8 @@ function spiderweb_parse_forum($data) {
       'title' => html_entity_decode($links[0]->innertext),
       'author' => $author,
       'length' => trim($cells[3]->innertext) + 1,
-      'updated' => strtotime($date) - TIME_OFFSET,
+      'updated' => spiderweb_parse_time($date),
     );
-    if (!strtotime($date)) {
-      var_dump($date, check_plain($topic->innertext));
-      return $forum;
-    }
     $forum->topics[$t->post] = $t;
   }
   $html->clear();
@@ -200,7 +198,7 @@ function spiderweb_parse_post($data) {
     if (!empty($meta['time'])) {
       $date .= $meta['time'];
     }
-    $post->created = strtotime($date);
+    $post->created = spiderweb_parse_timestamp($date);
   }
   else {
     return FALSE;
@@ -418,7 +416,7 @@ function spiderweb_parse_user($data) {
   if (preg_match('%<span class="time">(.*?)</span>%', $data, $match)) {
     $date .= $match[1];
   }
-  $user->joined = strtotime($date) - TIME_OFFSET;
+  $user->joined = spiderweb_parse_time($date);
 
   preg_match('%<b>Total Posts:</b>.*?&nbsp;  ([0-9]+) &nbsp;%s', $data, $match);
   $user->posts = (int) $match[1];
@@ -460,4 +458,12 @@ function spiderweb_parse_user($data) {
     }
   }
   return $user;
+}
+
+function spiderweb_parse_time($text) {
+  $tz = date_default_timezone_get();
+  date_default_timezone_set(SPIDERWEB_TIMEZONE);
+  $time = strtotime($text);
+  date_default_timezone_set($tz);
+  return $time;
 }
