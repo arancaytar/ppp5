@@ -438,6 +438,10 @@ function spiderweb_parse_user($data) {
     $user->fields['signature'] = spiderweb_parse_bbcode_reverse($match[1]);
   }
 
+  if (preg_match('%<tr><td>\s*Birthday:\s*</td><td>\s*&nbsp;(.+?)\s*</td></tr>%s', $data, $match)) {
+    $user->fields['birthday'] = $match[1];
+  }
+
   $fields = array(
     'im_icq' => 'IM \(ICQ\)',
     'im_yahoo' => 'IM \(YAHOO\)',
