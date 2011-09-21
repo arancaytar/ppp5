@@ -85,7 +85,14 @@ function spiderweb_parse_forum($data) {
     $forum->pages = $match[1];
   }
 
-  $topics = $html->find('table.t_inner', 1)->children;
+  $tables = $html->find('table.t_inner');
+  do {
+     $topics = array_shift($tables);
+  }
+  while (!preg_match('/<tr id="postrow-inline-[0-9]+">/', $topics->innertext));
+
+  $topics = $topics->children;
+
   // headers.
   array_shift($topics);
   foreach ($topics as $topic) {
