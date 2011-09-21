@@ -194,30 +194,31 @@ function ppp_data_save_user($user) {
 /**
  * Call this when indexing a forum to discover new topics, or when marking a topic as archived.
  *
- * @param $topic
- *   A topic object that must contain EITHER:
+ * @param $topics
+ *   An array of topic objects that must contain EITHER:
  *   {int post, int forum, int updated, int author, int length, string title}
  *   {int post, int archived for topics that are already saved}
  *   The latter has precedence, so an archived timestamp will cause other properties to be ignored.
  */
-function ppp_data_save_crawl($topic) {
-  if (empty($topic->archived)) {
-    $query = db_merge('ppp_crawl');
-    $query->key(array('post' => (int)$topic->post));
-    $query->fields(array(
-        'updated' => (int)$topic->updated,
-        'forum' => (int)$topic->forum,
-        'author' => (int)$topic->author,
-        'length' => (int)$topic->length,
-        'title' => "$topic->title",
-      ));
+function ppp_data_save_crawl($topics) {
+  foreach ($topics as $topic) {
+    if (empty($topic->archived)) {
+      $query = db_merge('ppp_crawl');
+      $query->key(array('post' => (int)$topic->post));
+      $query->fields(array(
+          'updated' => (int)$topic->updated,
+          'forum' => (int)$topic->forum,
+          'author' => (int)$topic->author,
+          'length' => (int)$topic->length,
+          'title' => "$topic->title",
+        ));
+    }
+    else {
+      $query = db_update('ppp_crawl');
+      $query->fields(array('archived' => (int)$topic->archived));
+      $query->condition('post', (int)$topic->post);
+    }
+    $query->execute();
   }
-  else {
-    $query = db_update('ppp_crawl');
-    $query->fields(array('archived' => (int)$topic->archived));
-    $query->condition('post', (int)$topic->post);
-  }
-
-  $query->execute();
 }
 
