@@ -63,7 +63,6 @@ function ppp_data_save_post($post) {
       'created' => (int)$post->created,
       'body' => "$post->body",
       'icon' => (int)$post->icon,
-      'ip' => "$post->ip",
     ));
   $query->execute();
 }
