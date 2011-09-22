@@ -191,7 +191,7 @@ function theme_ppp_display_forum_name($variables) {
  */
 function theme_ppp_display_forum_last($variables) {
   $post = $variables['post'];
-  return t('<span style="white-space: nowrap">In <a href="@url">%topic</a></span> <span style="white-space: nowrap">by !user</span> <span style="white-space: nowrap"> at %time</p>', array('@url' => url('topic/' . $post->tid), '%topic' => $post->title, '!user' => _ppp_display_userlink($post->author, $post->ended), '%time' => format_date($post->ended)));
+  return t('In <a href="@url">%topic</a> by !user at !time', array('@url' => url('topic/' . $post->tid), '%topic' => $post->title, '!user' => _ppp_display_userlink($post->author, $post->ended), '!time' => format_date($post->ended)));
 }
 
 function theme_ppp_display_post_author($variables) {
