@@ -205,13 +205,13 @@ function spiderweb_parse_post($data) {
     if (!empty($meta['time'])) {
       $date .= $meta['time'];
     }
-    $post->created = spiderweb_parse_timestamp($date);
+    $post->created = spiderweb_parse_time($date);
   }
   else {
     return FALSE;
   }
 
-  if (preg_match('%<div id="body[0-9]+">(?P<body>.*)</div>%s', $data, $body)) {
+  if (preg_match('%<div id="body[0-9]+">(?P<body>.*)</div>\s*<span class="edited-wording">(.*?)</span>%s', $data, $body)) {
     $post->body = spiderweb_parse_bbcode_reverse($body['body']);
   }
   else {
@@ -240,15 +240,9 @@ function spiderweb_parse_post($data) {
  *   An object, being the DOM element whose inner content should be reversed.
  *   Alternatively, a string.
  */
-function spiderweb_parse_bbcode_reverse($dom) {
+function spiderweb_parse_bbcode_reverse($html) {
   module_load_include('inc', 'spiderweb', 'spiderweb.html');
-  if (!is_object($dom)) {
-    $dom = spiderweb_html_parse($dom);
-    $clear = TRUE;
-  }
-  else {
-    $clear = FALSE;
-  }
+  $dom = spiderweb_html_parse($html);
   $result = $dom->innertext;
 
   foreach ($dom->find('div.ubbcode-block') as $q) {
@@ -259,15 +253,18 @@ function spiderweb_parse_bbcode_reverse($dom) {
     elseif (isset($body->children[0]) && $body->children[0]->style == 'display: none;') {
       $tag = "[spoiler]{$body->children[0]->innertext}[/spoiler]";
     }
-    else {
+    elseif ($body) {
       $author = trim(strchr($q->find('div.ubbcode-header', 0)->innertext, ':'), ': ');
       $tag  = $author ? "[quote={$author}]{$body->innertext}[/quote]" : "[quote]{$body->innertext}[/quote]";
+    }
+    else {
+      throw new Exception("Unrecognized block tag:" . check_plain($dom->innertext) . check_plain($result));
     }
     $result = str_replace($q->outertext, $tag, $result);
   }
 
   // Reparse now that the quotes are removed.
-  if ($clear) $dom->clear();
+  $dom->clear();
   $dom = spiderweb_html_parse($result);
   $result = $dom->innertext;
 
@@ -296,18 +293,28 @@ function spiderweb_parse_bbcode_reverse($dom) {
       elseif ($property == 'font-family') {
         $tag = "[font={$value}]{$content}[/font]";
       }
-      else {
-        $span->dump();
-        var_dump($property, $value, $content);
+      elseif ($property == 'vertical-align') {
+        $tag = "[su{$value[2]}]{$content}[/su{$value[2]}]";
       }
-      $result = str_replace($span->outertext, $tag, $result);
+      else {
+        throw new Exception("Unrecognized span tag: $property, $value, $content");
+      }
+      if (isset($tag)) {
+        $start = strpos($result, $span->outertext);
+        $result = substr($result, 0, $start) . $tag . substr($result, $start + strlen($span->outertext));
+      }
     }
   }
 
-  foreach ($dom->find('a') as $a) {
+  /*foreach ($dom->find('a') as $a) {
     $url = "[url={$a->href}]{$a->innertext}[/url]";
     $result = str_replace($a->outertext, $url, $result);
-  }
+  }*/
+  // Rely on UBB not to emit broken tags.
+  $result = preg_replace('%<a href="(.*?)".*?>%', '[url=$1]', $result);
+  $result = str_replace('</a>', '[/url]', $result);
+  $result = str_replace(array('<ul.*?>', '</ul>'), array('[list]', '[/list]'), $result);
+  $result = preg_replace('%<li>(.*?)</li>%', '[*]$1' . "\n", $result);
 
   foreach ($dom->find('img') as $img) {
     if (dirname($img->src) == '/forum/images/graemlins/default') {
@@ -321,9 +328,8 @@ function spiderweb_parse_bbcode_reverse($dom) {
 
   $result = str_replace('<br />', "\n", $result);
   $result = html_entity_decode($result);
-  if ($clear) {
-    $dom->clear();
-  }
+  $dom->clear();
+
   return $result;
 }
 
