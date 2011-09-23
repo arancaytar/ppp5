@@ -206,6 +206,10 @@ function ppp_data_schema() {
         'description' => 'When was this profile last downloaded? unix timestamp',
         'type' => 'int',
       ),
+      'deleted' => array(
+        'description' => 'If the account is deleted on Spiderweb, mark the detection time here.',
+        'type' => 'int',
+      ),
     ),
     'primary key' => array('uid'),
     'indexes' => array(

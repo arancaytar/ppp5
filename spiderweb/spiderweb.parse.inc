@@ -418,6 +418,12 @@ function spiderweb_parse_user($data) {
     $user->uid = $match[1];
   }
   else {
+    if (strpos($data, 'This user is no longer in our database.')) {
+      preg_match('/ubb%3Dshowprofile%26User%3D([0-9]+)/', $data, $match);
+      $user->uid = $match[1];
+      $user->del = TRUE;
+      return $user;
+    }
     return FALSE;
   }
 

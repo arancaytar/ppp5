@@ -120,6 +120,18 @@ function ppp_data_save_category($category) {
  */
 function ppp_data_save_user($user) {
   module_load_include('inc', 'ppp_data', 'ppp_data.load');
+
+  // Set update timestamp.
+  if (!isset($user->updated)) {
+    $user->updated = time();
+  }
+  // Mark user deleted if necessary.
+  if (!empty($user->del)) {
+    db_update('ppp_user')->fields(array('deleted' => $user->updated))->condition('uid', $user->uid)->execute();
+    return;
+  }
+
+  // Fetch last known profile fields to compare with current.
   $query = db_query('SELECT * FROM {ppp_user_profile} WHERE uid = :uid AND expired IS NULL', array(':uid' => $user->uid));
   $old_fields = array();
   while ($row = $query->fetch()) {
@@ -127,10 +139,6 @@ function ppp_data_save_user($user) {
   }
   $fields = ppp_data_load_fields();
   $added = array();
-
-  if (!isset($user->updated)) {
-    $user->updated = time();
-  }
 
   // If a user is already here, use a lot of intricate logic to update fields.
   if ($old_fields) {
