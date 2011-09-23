@@ -280,6 +280,30 @@ function ppp_data_schema() {
     ),
   );
 
+  $schema['user_postcount'] = array(
+    'description' => 'Record postcounts by users at specific dates.',
+    'fields' => array(
+      'uid' => array(
+        'description' => 'The user ID of the account.',
+        'type' => 'int',
+      ),
+      'recorded' => array(
+        'description' => 'When the postcount was recorded.',
+        'type' => 'int',
+      ),
+      'posts' => array(
+        'description' => 'The postcount.',
+        'type' => 'int',
+      ),
+    ),
+    'primary key' => array('uid', 'recorded'),
+    'indexes' => array(
+      'uid' => array('uid'),
+      'posts' => array('posts'),
+      'uid_posts' => array('uid', 'posts'),
+    ),
+  );
+
   $schema['crawl'] = array(
     'description' => 'Keeps track of when a topic was last crawled, or which topics were NEVER crawled.',
     'fields' => array(

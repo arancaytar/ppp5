@@ -130,6 +130,11 @@ function ppp_data_save_user($user) {
     db_update('ppp_user')->fields(array('deleted' => $user->updated))->condition('uid', $user->uid)->execute();
     return;
   }
+  // Record new postcount if changed.
+  $query = db_query('SELECT * FROM {ppp_user_postcount} WHERE uid = :uid AND posts = :posts', array(':uid' => $user->uid, ':posts' => $user->posts));
+  if (!$query->fetch()) {
+    db_insert('ppp_user_postcount')->fields(array('uid' => $user->uid, 'recorded' => $user->updated, 'posts' => $user->posts))->execute();
+  }
 
   // Fetch last known profile fields to compare with current.
   $query = db_query('SELECT * FROM {ppp_user_profile} WHERE uid = :uid AND expired IS NULL', array(':uid' => $user->uid));
