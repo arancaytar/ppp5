@@ -313,7 +313,7 @@ function spiderweb_parse_bbcode_reverse($html) {
   // Rely on UBB not to emit broken tags.
   $result = preg_replace('%<a href="(.*?)".*?>%', '[url=$1]', $result);
   $result = str_replace('</a>', '[/url]', $result);
-  $result = str_replace(array('<ul.*?>', '</ul>'), array('[list]', '[/list]'), $result);
+  $result = str_replace(array('<ul style="list-style-type: disc">', '</ul>', '<ol style="list-style-type: decimal">', '</ol>'), array('[list]', '[/list]', '[list=ol]', '[/list]'), $result);
   $result = preg_replace('%<li>(.*?)</li>%', '[*]$1' . "\n", $result);
 
   foreach ($dom->find('img') as $img) {
