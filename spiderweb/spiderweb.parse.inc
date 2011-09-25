@@ -327,7 +327,6 @@ function spiderweb_parse_bbcode_reverse($html) {
   }
 
   $result = str_replace('<br />', "\n", $result);
-  $result = html_entity_decode($result);
   $dom->clear();
 
   return $result;
