@@ -87,7 +87,17 @@ function spiderweb_parse_forum($data) {
 
   $tables = $html->find('table.t_inner');
   do {
-     $topics = array_shift($tables);
+    $topics = array_shift($tables);
+    /* UBB.threads bug: Sticky topics increase the number of topics on the first 
+     * page, but are not subtracted from the total when calculating
+     * pages = total / topics per page. The page count may be overestimated.
+     * For example, on 361 topics with 1 sticky, page 19 will be available
+     * but empty. Allow for this possibility.
+     */
+    if (!$topics) {
+      $html->clear();
+      return $forum;
+    }
   }
   while (!preg_match('/<tr id="postrow-inline-[0-9]+">/', $topics->innertext));
 
