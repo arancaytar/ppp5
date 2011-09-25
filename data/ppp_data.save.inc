@@ -61,7 +61,7 @@ function ppp_data_save_post($post) {
       'forum' => (int)$post->forum,
       'author' => (int)$post->author,
       'created' => (int)$post->created,
-      'body' => "$post->body",
+      'body' => "{$post->body}",
       'icon' => (int)$post->icon,
     ));
   $query->execute();
