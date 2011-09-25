@@ -9,6 +9,7 @@
 
 define('SPIDERWEB_URL', 'http://www.spiderwebforums.com/forum');
 define('SPIDERWEB_CHARSET', 'WINDOWS-1252');
+define('PIPERBOT_USER_AGENT', 'PiperBot/0.1alpha (+http://dev.ermarian.net/ppp)');
 
 /**
  * Get stored cookies, or store new cookie.
@@ -108,7 +109,10 @@ function spiderweb_get($fields, $page = 'ubbthreads.php', $cookies = "") {
   $url = SPIDERWEB_URL . "/$page";
   if (!$cookies) $cookies = 'ubbt_myid=0; PHPSESSID=00000000000000000000000000000000';
   $options = array(
-    'headers' => array('Cookie' => $cookies),
+    'headers' => array(
+      'Cookie' => $cookies,
+      'User-Agent' => PIPERBOT_USER_AGENT,
+    ),
   );
   $query = drupal_http_build_query($fields);
   $response = drupal_http_request("$url?$query", $options);
