@@ -179,9 +179,12 @@ function spiderweb_parse_topic($data) {
       // Denormalize these IDs downwards:
       $post->topic = $topic->tid;
       $post->forum = $topic->forum;
-      preg_match('%<div id="profile_popup_' . $post->pid . '".*?&amp;User=(?P<author>[0-9]+)"%s', $data, $author);
-      $post->author = $author['author'];
-
+      if (preg_match('%<div id="profile_popup_' . $post->pid . '".*?&amp;User=(?P<author>[0-9]+)"%s', $data, $author)) {
+        $post->author = $author['author'];
+      }
+      else {
+        $post->author = 0;
+      }
       $topic->posts[] = $post;
     }
   }
