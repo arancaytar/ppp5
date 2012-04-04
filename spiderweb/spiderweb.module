@@ -73,6 +73,7 @@ function spiderweb_grab_forum_page($forum, $page) {
     'ubb' => 'postlist',
     'Board' => $forum,
     'page' => $page,
+    'o' => 'all', // avoid date cut-off.
   );
 
   $response = spiderweb_get($form);
