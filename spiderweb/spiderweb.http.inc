@@ -115,7 +115,10 @@ function spiderweb_get($fields, $page = 'ubbthreads.php', $cookies = "") {
     ),
   );
   $query = drupal_http_build_query($fields);
-  $response = drupal_http_request("$url?$query", $options);
+  $response = spiderweb_http_curl("$url?$query", $options);
+  if (empty($response->data)) {
+    throw new Exception("Received no data from Spiderweb. <pre>" . print_r($response, TRUE) . "</pre>");
+  }
 
   // Make sure we get back valid UTF-8.
   // We can't trust UBB's headers. They claim ISO-8859-1, but send Cp1252/Windows.
@@ -123,3 +126,25 @@ function spiderweb_get($fields, $page = 'ubbthreads.php', $cookies = "") {
   return $response;
 }
 
+function spiderweb_http_curl($url, $options) {
+  $curl = &drupal_static(__FUNCTION__, curl_init());
+
+  curl_setopt($curl, CURLOPT_URL, $url);
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+  if (!empty($options['method'])) {
+    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $options['method']);
+  }
+  if (!empty($options['headers'])) {
+    $headers = array();
+    foreach ($options['headers'] as $name => $value) {
+      $headers[] = "$name: $value";
+    }
+    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+  }
+  if (!empty($options['data'])) {
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $options['data']);
+  }
+
+  $data = curl_exec($curl);
+  return (object) (array('data' => $data));
+}
