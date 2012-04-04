@@ -254,8 +254,14 @@ function spiderweb_parse_post($data) {
  *   Alternatively, a string.
  */
 function spiderweb_parse_bbcode_reverse($html) {
+  if (!$html) {
+    return "";
+  }
   module_load_include('inc', 'spiderweb', 'spiderweb.html');
   $dom = spiderweb_html_parse($html);
+  if (!$dom) {
+    throw new Exception("Post could not be parsed: " . check_plain($html));
+  }
   $result = $dom->innertext;
 
   foreach ($dom->find('div.ubbcode-block') as $q) {
