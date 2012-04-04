@@ -179,7 +179,7 @@ function spiderweb_parse_topic($data) {
       // Denormalize these IDs downwards:
       $post->topic = $topic->tid;
       $post->forum = $topic->forum;
-      if (preg_match('%<div id="profile_popup_' . $post->pid . '".*?&amp;User=(?P<author>[0-9]+)"%s', $data, $author)) {
+      if (preg_match('%<div id="profile_popup_' . $post->pid . '".*?&User=(?P<author>[0-9]+)"%s', $data, $author)) {
         $post->author = $author['author'];
       }
       else {
@@ -432,7 +432,8 @@ function spiderweb_parse_user($data) {
   $user = (object) array();
   $user->fields = array();
 
-  if (preg_match('%<b>Member #:</b>.*?&nbsp;  ([0-9]+) &nbsp;%s', $data, $match)) {
+  // Take note here: Some of the spaces are actually U00A0 characters.
+  if (preg_match('%<b>Member #:</b>.*?   ([0-9]+)  %s', $data, $match)) {
     $user->uid = $match[1];
   }
   else {
@@ -455,10 +456,10 @@ function spiderweb_parse_user($data) {
   }
   $user->joined = spiderweb_parse_time($date);
 
-  preg_match('%<b>Total Posts:</b>.*?&nbsp;  ([0-9]+) &nbsp;%s', $data, $match);
+  preg_match('%<b>Total Posts:</b>.*?   ([0-9]+)  %s', $data, $match);
   $user->posts = (int) $match[1];
 
-  preg_match('%<b>Title:</b>.*?&nbsp;  ([^\r\n]+) &nbsp;%s', $data, $match);
+  preg_match('%<b>Title:</b>.*?   ([^\r\n]+)  %s', $data, $match);
   $user->fields['title'] = $match[1];
 
   if (preg_match('/<a href="mailto:(.+?)">\1<\/a>/', $data, $match)) {
@@ -473,7 +474,7 @@ function spiderweb_parse_user($data) {
     $user->fields['signature'] = spiderweb_parse_bbcode_reverse($match[1]);
   }
 
-  if (preg_match('%<tr><td>\s*Birthday:\s*</td><td>\s*&nbsp;(.+?)\s*</td></tr>%s', $data, $match)) {
+  if (preg_match('%<tr><td>\s*Birthday:\s*</td><td>\s* (.+?)\s*</td></tr>%s', $data, $match)) {
     $user->fields['birthday'] = $match[1];
   }
 
@@ -490,7 +491,7 @@ function spiderweb_parse_user($data) {
   );
 
   foreach ($fields as $name => $title) {
-    if (preg_match('%<td valign=.top.>.*?' . $title . ':\s*?</td>\s*?<td valign=.top.>\s*?&nbsp;\s*?([^\s]([^\r\n]*?[^\s])?)\s*?</td>%s', $data, $match)) {
+    if (preg_match('%<td valign=.top.>.*?' . $title . ':\s*?</td>\s*?<td valign=.top.>\s*? \s*?([^\s]([^\r\n]*?[^\s])?)\s*?</td>%s', $data, $match)) {
       $user->fields[$name] = check_plain($match[1]);
     }
   }
