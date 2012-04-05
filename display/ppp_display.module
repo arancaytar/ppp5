@@ -162,23 +162,13 @@ function ppp_topic_load($tid) {
 /**
  * Generate the title for a forum.
  */
-function ppp_display_title_forum($forum, $html = FALSE) {
-  if ($html) {
-    return t('Forum: %name', array('%name' => $forum->name));
-  }
-  else {
-    return t('Forum: @name', array('@name' => $forum->name));
-  }
+function ppp_display_title_forum($forum) {
+  return $forum->name;
 }
 
 /**
  * Generate the title for a topic.
  */
-function ppp_display_title_topic($topic, $html = FALSE) {
-  if ($html) {
-    return t('Topic: %name', array('%name' => $topic->title));
-  }
-  else {
-    return t('Topic: @name', array('@name' => $topic->title));
-  }
+function ppp_display_title_topic($topic) {
+  return $topic->title;
 }
