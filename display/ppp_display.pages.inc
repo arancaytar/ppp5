@@ -44,7 +44,7 @@ function ppp_display_page_main() {
         'name' => theme('ppp_display_forum_name', array('forum' => $forum)),
         'topics' => $forum->topics,
         'posts' => $forum->posts,
-        'last' => $last ? theme('ppp_display_forum_last', array('post' => $last)) : t('<span style="white-space:nowrap">No content</span>'),
+        'last' => $last ? theme('ppp_display_forum_last', array('post' => $last)) : t('<span class="no-content">No content</span>'),
       );
     }
   }
@@ -197,7 +197,8 @@ function theme_ppp_display_forum_last($variables) {
 function theme_ppp_display_post_author($variables) {
   $user = $variables['user'];
   $out = '<p><a class="username" href="' . url("user/{$user->uid}") . '">' . $user->pdn . '</a><br />';
-  $out .= '<span class="title">' . $user->fields['title'] . '</span></p>';
+  $out .= '<span class="title">' . $user->fields['title'] . '</span><br />';
+  $out .= '<span class="uid">' . t('Member # @uid', array('@uid' => $user->uid)) . '</span>';
   return $out;
 }
 
