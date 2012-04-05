@@ -60,7 +60,7 @@ function ppp_display_page_forum($forum) {
 
   drupal_set_breadcrumb(array(
       l(t('Archives'), 'archives'),
-      l(ppp_display_title_forum($forum, TRUE), "forum/{$forum->fid}", array('html' => TRUE)),
+      l($forum->name, 'forum/' . $forum->fid),
   ));
 
   $page = array(
@@ -136,8 +136,8 @@ function ppp_display_page_topic($topic) {
   $forum = $topic->get_forum();
   drupal_set_breadcrumb(array(
       l(t('Archives'), 'archives'),
-      l(ppp_display_title_forum($forum, TRUE), "forum/{$forum->fid}", array('html' => TRUE)),
-      l(ppp_display_title_topic($topic, TRUE), "topic/{$topic->tid}", array('html' => TRUE)),
+      l($forum->name, 'forum/' . $forum->fid),
+      l($topic->title, 'topic/' . $topic->tid),
   ));
 
   $pager = array('#theme' => 'pager');
@@ -191,7 +191,7 @@ function theme_ppp_display_forum_name($variables) {
  */
 function theme_ppp_display_forum_last($variables) {
   $post = $variables['post'];
-  return t('In <a href="@url">%topic</a> by !user at !time', array('@url' => url('topic/' . $post->tid), '%topic' => $post->title, '!user' => _ppp_display_userlink($post->author, $post->ended), '!time' => format_date($post->ended)));
+  return t('!topic by !user at !time', array('!topic' => l($post->title, 'topic/' . $post->tid), '!user' => _ppp_display_userlink($post->author, $post->ended), '!time' => format_date($post->ended)));
 }
 
 function theme_ppp_display_post_author($variables) {
