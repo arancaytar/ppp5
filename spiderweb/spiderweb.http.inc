@@ -122,7 +122,7 @@ function spiderweb_get($fields, $page = 'ubbthreads.php', $cookies = "") {
 
   // Make sure we get back valid UTF-8.
   // We can't trust UBB's headers. They claim ISO-8859-1, but send Cp1252/Windows.
-  $response->data = iconv(SPIDERWEB_CHARSET, 'UTF-8', $response->data);
+  $response->data = iconv(SPIDERWEB_CHARSET, 'UTF-8//IGNORE', $response->data);
 
   // Also, decode all character references, as stored data will be re-encoded before output.
   // Convert only specific entities, to avoid re-encoding characters already in UTF-8
