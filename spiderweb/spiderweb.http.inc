@@ -124,9 +124,14 @@ function spiderweb_get($fields, $page = 'ubbthreads.php', $cookies = "") {
   // We can't trust UBB's headers. They claim ISO-8859-1, but send Cp1252/Windows.
   $response->data = iconv(SPIDERWEB_CHARSET, 'UTF-8', $response->data);
 
-  // Also, decode all HTML entities, as stored data will be reencoded before output.
-  $response->data = mb_convert_encoding($response->data, 'UTF-8', 'HTML-ENTITIES');
+  // Also, decode all character references, as stored data will be re-encoded before output.
+  // Convert only specific entities, to avoid re-encoding characters already in UTF-8
+  $response->data = preg_replace_callback('/&[^;]+;/', '_spiderweb_decode_character', $response->data);
   return $response;
+}
+
+function _spiderweb_decode_character($reference) {
+  return mb_convert_encoding($reference[0], 'UTF-8', 'HTML-ENTITIES');
 }
 
 function spiderweb_http_curl($url, $options) {
