@@ -172,8 +172,11 @@ function spiderweb_parse_topic($data) {
   // We have now parsed all the five "normal" topic properties. The other six are aggregated from post content, which is now parsed.
 
   $topic->posts = array();
-  preg_match_all('$<table width="100%" cellspacing="0" cellpadding="0">(?<post>.*?)</table>$s', $data, $posts);
-  foreach ($posts['post'] as $post_data) {
+  if (!preg_match('/<a name="Post[0-9]+">(.*?)<div id="prev-next-links">/s', $data, $posts)) {
+    throw new Exception("Topic is empty.");
+  }
+  $posts = preg_split('/<a name="Post[0-9]+">/', $posts[1]);
+  foreach ($posts as $post_data) {
     $post = spiderweb_parse_post($post_data);
     if ($post) {
       // Denormalize these IDs downwards:
@@ -224,8 +227,13 @@ function spiderweb_parse_post($data) {
     return FALSE;
   }
 
-  if (preg_match('%<div id="body[0-9]+">(?P<body>.*)</div>\s*<span class="edited-wording">(.*?)</span>%s', $data, $body)) {
-    $post->body = spiderweb_parse_bbcode_reverse($body['body']);
+  if (preg_match('%<div id="body[0-9]+">(?P<body>.*)</div>(?P<poll>.*)(?P<edit><span class="edited-wording">.*?</span>)\s+<(div|br)%s', $data, $body)) {
+    $post->body = spiderweb_parse_bbcode_reverse($body['body'] . trim($body['poll']));
+    if (preg_match('%<span class="small"><em>Edited by (?P<name>.*?) \(<span class="date">(?P<date>.*?)</span>\)(<br />Edit Reason: (?P<msg>.*?))?</em></span>%', $body['edit'], $edit)) {
+      $post->edit_name = $edit['name'];
+      $post->edit_date = spiderweb_parse_time($edit['date']);
+      $post->edit_msg = isset($edit['msg']) ? $edit['msg'] : NULL;
+    }
   }
   else {
     return FALSE;
