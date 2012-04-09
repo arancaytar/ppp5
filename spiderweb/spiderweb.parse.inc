@@ -171,11 +171,14 @@ function spiderweb_parse_topic($data) {
 
   // We have now parsed all the five "normal" topic properties. The other six are aggregated from post content, which is now parsed.
 
+  // The following is a dirty way to split the posts, but it is both faster and
+  // more reliable than regular expressions on large strings.
+  $posts = strstr($data, '<td class="tdheader" style="cursor: pointer" id="rating_control"');
+  $posts = substr($posts, 0, strpos($posts, '<div id="prev-next-links">'));
+  $posts = explode('<a name="Post', $posts);
+  array_shift($posts);
+
   $topic->posts = array();
-  if (!preg_match('/<a name="Post[0-9]+">(.*?)<div id="prev-next-links">/s', $data, $posts)) {
-    throw new Exception("Topic is empty.");
-  }
-  $posts = preg_split('/<a name="Post[0-9]+">/', $posts[1]);
   foreach ($posts as $post_data) {
     $post = spiderweb_parse_post($post_data);
     if ($post) {
