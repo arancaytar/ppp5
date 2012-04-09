@@ -100,7 +100,8 @@ function ppp_data_load_post($pid) {
  *   A topic object.
  */
 function ppp_data_load_topic($tid) {
-  return new PPPTopic(db_query('SELECT * FROM {ppp_topic} WHERE tid = :tid', array(':tid' => (int)$tid))->fetch());
+  $data = db_query('SELECT * FROM {ppp_topic} WHERE tid = :tid', array(':tid' => (int)$tid))->fetch();
+  return $data ? new PPPTopic($data) : NULL;
 }
 
 /**
@@ -113,7 +114,8 @@ function ppp_data_load_topic($tid) {
  *   A forum object
  */
 function ppp_data_load_forum($fid) {
-  return new PPPForum(db_query('SELECT * FROM {ppp_forum} WHERE fid = :fid', array(':fid' => (int)$fid))->fetch());
+  $data = db_query('SELECT * FROM {ppp_forum} WHERE fid = :fid', array(':fid' => (int)$fid))->fetch();
+  return $data ? new PPPForum($data) : NULL;
 }
 
 /**
