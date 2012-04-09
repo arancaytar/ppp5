@@ -63,6 +63,9 @@ function ppp_data_save_post($post) {
       'created' => (int)$post->created,
       'body' => "{$post->body}",
       'icon' => (int)$post->icon,
+      'edit_name' => isset($post->edit_name) ? "{$post->edit_name}" : NULL,
+      'edit_date' => isset($post->edit_date) ? (int) $post->edit_date : NULL,
+      'edit_msg' => isset($post->edit_reason) ? "{$post->edit_msg}" : NULL,
     ));
   $query->execute();
 }
