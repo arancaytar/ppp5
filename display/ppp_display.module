@@ -29,31 +29,31 @@ function ppp_display_menu() {
   $menu['archives'] = array(
     'title' => 'Archives',
     'description' => 'View all forums',
-    'page callback' => 'ppp_display_page_main',
+    'page callback' => '_ppp_display_page_main',
     'access arguments' => array('view archived content'),
-    'file' => 'ppp_display.pages.inc',
+    'file' => 'ppp_display.main.inc',
     'type' => MENU_NORMAL_ITEM,
   );
 
   $menu['forum/%ppp_forum'] = array(
-    'title callback' => 'ppp_display_title_forum',
+    'title callback' => '_ppp_display_title_forum',
     'title arguments' => array(1),
-    'page callback' => 'ppp_display_page_forum',
+    'page callback' => '_ppp_display_page_forum',
     'page arguments' => array(1),
-    'access callback' => 'ppp_display_access_forum',
+    'access callback' => '_ppp_display_access_forum',
     'access arguments' => array(1),
-    'file' => 'ppp_display.pages.inc',
+    'file' => 'ppp_display.forum.inc',
     'type' => MENU_CALLBACK,
   );
 
   $menu['topic/%ppp_topic'] = array(
-    'title callback' => 'ppp_display_title_topic',
+    'title callback' => '_ppp_display_title_topic',
     'title arguments' => array(1),
-    'page callback' => 'ppp_display_page_topic',
+    'page callback' => '_ppp_display_page_topic',
     'page arguments' => array(1),
-    'access callback' => 'ppp_display_access_topic',
+    'access callback' => '_ppp_display_access_topic',
     'access arguments' => array(1),
-    'file' => 'ppp_display.pages.inc',
+    'file' => 'ppp_display.topic.inc',
     'type' => MENU_CALLBACK,
   );
 
@@ -74,19 +74,16 @@ function ppp_display_perm() {
  * Implementation of hook_theme()
  */
 function ppp_display_theme() {
-  $theme['ppp_display_forum_name'] = array(
-    'variables' => array('forum' => NULL),
+  return array(
+    'ppp_display_post_sidebar' => array(
+      'template' => 'ppp_display_post_sidebar',
+      'variables' => array('post' => NULL, 'topic' => NULL, 'user' => NULL),
+    ),
+    'ppp_display_post_body' => array(
+      'template' => 'ppp_display_post_body',
+      'variables' => array('posts' => NULL, 'topic' => NULL, 'user' => NULL),
+    ),
   );
-  $theme['ppp_display_post_author'] = array(
-    'variables' => array('post' => NULL, 'topic' => NULL, 'user' => NULL),
-  );
-  $theme['ppp_display_post_content'] = array(
-    'variables' => array('posts' => NULL, 'topic' => NULL, 'user' => NULL),
-  );
-  $theme['ppp_display_forum_last'] = array(
-    'variables' => array('post' => NULL),
-  );
-  return $theme;
 }
 
 /**
@@ -98,10 +95,9 @@ function ppp_display_theme() {
  * @return
  *   A user access boolean.
  */
-function ppp_display_access_forum($forum) {
+function _ppp_display_access_forum($forum) {
   $mod_boards = variable_get('ppp_classified_fora', array());
-
-  if (!empty($mod_boards[$forum->fid])) {
+  if ($forum && !empty($mod_boards[$forum->fid])) {
     return user_access('view classified content');
   }
   else {
@@ -119,11 +115,9 @@ function ppp_display_access_forum($forum) {
  * @return
  *   A user access boolean.
  */
-function ppp_display_access_topic($topic) {
-  $forum = $topic->get_forum();
+function _ppp_display_access_topic($topic) {
   $mod_boards = variable_get('ppp_classified_fora', array());
-
-  if (!empty($mod_boards[$forum->fid])) {
+  if ($topic && $forum = $topic->get_forum() && !empty($mod_boards[$forum->fid])) {
     return user_access('view classified content');
   }
   else {
@@ -162,13 +156,28 @@ function ppp_topic_load($tid) {
 /**
  * Generate the title for a forum.
  */
-function ppp_display_title_forum($forum) {
-  return $forum->name;
+function _ppp_display_title_forum($forum) {
+  return $forum ? $forum->name : NULL;
 }
 
 /**
  * Generate the title for a topic.
  */
-function ppp_display_title_topic($topic) {
-  return $topic->title;
+function _ppp_display_title_topic($topic) {
+  return $topic ? $topic->title : NULL;
 }
+
+/**
+ * Create a link to a user using a time-appropriate name if possible.
+ */
+function _ppp_display_userlink($uid, $date = NULL) {
+  module_load_include('inc', 'ppp_data', 'ppp_data.load');
+  $user = ppp_data_load_user($uid, $date);
+  if ($user) {
+    return l($user->fields['displayed_name'], 'member/' . $uid);
+  }
+  else {
+    return t('User #!uid', array('!uid' => $uid));
+  }
+}
+
