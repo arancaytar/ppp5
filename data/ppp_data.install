@@ -122,6 +122,20 @@ function ppp_data_schema() {
         'description' => 'Content of the post',
         'type' => 'text',
       ),
+      'edit_name' => array(
+        'description' => 'User name who last edited the post (optional)',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'edit_date' => array(
+        'description' => 'Unix timestamp when this post was last edited (optional)',
+        'type' => 'int',
+      ),
+      'edit_msg' => array(
+        'description' => 'Message entered when last editing (optional)',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
     ),
     'primary key' => array('pid'),
     'indexes' => array(
