@@ -192,6 +192,9 @@ function spiderweb_parse_topic($data) {
         $post->author = 0;
       }
       $topic->posts[] = $post;
+    } else {
+      var_dump($post_data);
+      throw Exception("Unparseable post.");
     }
   }
 
