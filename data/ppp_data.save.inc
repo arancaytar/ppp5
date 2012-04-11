@@ -191,6 +191,7 @@ function ppp_data_save_user($user) {
       'field' => (int) $fid,
       'value' => "{$value}",
       'created' => (int) $user->updated,
+      'previous' => isset($old_fields[$fid]) ? $old_fields[$fid]->aid : NULL,
     ));
   }
   $query->execute();

@@ -283,9 +283,13 @@ function ppp_data_schema() {
         'type' => 'int',
       ),
       'expired' => array(
-        'description' => 'Timestamp of the moment this field was replaced, or NULL if the field is current.',
+        'description' => 'Timestamp of the moment this field was replaced or removed, or NULL if the field is current.',
         'type' => 'int',
       ),
+      'previous' => array(
+        'description' => 'The record that is replaced by this value, or NULL if the field is the first.',
+        'type' => 'int',
+      ),      
     ),
     'primary key' => array('aid'),
     'unique' => array('uid', 'field', 'created'),
