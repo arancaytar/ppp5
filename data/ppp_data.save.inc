@@ -184,7 +184,7 @@ function ppp_data_save_user($user) {
   }
 
   // Insert new fields, whether the user exists or not.
-  $query = db_insert('ppp_user_profile')->fields(array('uid', 'field', 'value', 'created'));
+  $query = db_insert('ppp_user_profile')->fields(array('uid', 'field', 'value', 'created', 'previous'));
   foreach ($added as $fid => $value) {
     $query->values(array(
       'uid' => (int) $user->uid,
