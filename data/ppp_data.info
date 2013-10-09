@@ -1,4 +1,3 @@
-; $Id$
 
 name = Data Layer
 description = The PPP database and object handler.
